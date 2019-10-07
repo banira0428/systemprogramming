@@ -1,10 +1,10 @@
-This is e-pTeX, Version 3.14159265-p3.8.2-190131-2.6 (utf8.euc) (TeX Live 2019) (preloaded format=platex 2019.5.23)  7 OCT 2019 12:44
+This is e-pTeX, Version 3.14159265-p3.8.2-190131-2.6 (utf8.euc) (TeX Live 2019) (preloaded format=platex 2019.5.23)  7 OCT 2019 13:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**eop2_09430559.tex
-(./eop2_09430559.tex
+**sys_pro1_09430559.tex
+(./sys_pro1_09430559.tex
 pLaTeX2e <2019-04-06> (based on LaTeX2e <2018-12-01>)
 (/usr/local/texlive/2019/texmf-dist/tex/platex/base/jarticle.cls
 Document Class: jarticle 2019/04/02 v1.8b Standard pLaTeX class
@@ -60,8 +60,8 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 \Gm@layoutvoffset=\dimen128
 \Gm@dimlist=\toks16
 )
-(./eop2_09430559.aux)
-\openout1 = `eop2_09430559.aux'.
+No file sys_pro1_09430559.aux.
+\openout1 = `sys_pro1_09430559.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 25.
 LaTeX Font Info:    ... okay on input line 25.
@@ -79,7 +79,6 @@ LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 25.
 LaTeX Font Info:    ... okay on input line 25.
 LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 25.
 LaTeX Font Info:    ... okay on input line 25.
-
 *geometry* driver: auto-detecting
 *geometry* detected driver: dvips
 *geometry* verbose mode - [ preamble ] result:
@@ -126,14 +125,18 @@ LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <14.4> not available
 (Font)              Font shape `JY1/gt/m/n' tried instead on input line 41.
 [1
 
-] (./eop2_09430559.aux) ) 
+] (./sys_pro1_09430559.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 829 strings out of 493223
- 11140 string characters out of 6144415
- 83820 words of memory out of 5000000
+ 827 strings out of 493223
+ 11132 string characters out of 6144415
+ 83812 words of memory out of 5000000
  4875 multiletter control sequences out of 15000+600000
  14019 words of font info for 55 fonts, out of 8000000 for 9000
  929 hyphenation exceptions out of 8191
- 23i,6n,20p,145b,233s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 23i,6n,20p,149b,233s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on eop2_09430559.dvi (1 page, 1088 bytes).
+Output written on sys_pro1_09430559.dvi (1 page, 1088 bytes).
