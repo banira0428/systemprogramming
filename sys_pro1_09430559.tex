@@ -81,7 +81,19 @@ A.9節 最後「システムコール」に示されている方法のそれぞ�
 \subsection{作成したプログラム}
 
 \begin{verbatim}
-      
+      1          .data
+      2          .align 2
+      3  msg:
+      4          .asciiz "Hello World"
+      5
+      6          .text
+      7          .align 2
+      8  main:
+      9          la      $a0, msg
+     10          li      $v0, 4
+     11          syscall
+     12          j       $ra
+     13          
 \end{verbatim}
 
 \subsection{考察}
