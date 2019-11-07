@@ -11,43 +11,48 @@ main:
         move    $s0, $ra
         li      $s1, 1
         la      $a0, msg
-        jal     print
+        jal     print_string
         li      $a0, 10
         jal     fact
         move    $a0, $v0
-        li      $v0, 1
-        syscall
+        jal     print_int
         la      $a0, newline
-        jal     print
+        jal     print_string
         j       $s0
 
 fact:
-        subu  $sp, $sp, 32
-        sw    $ra, 20($sp)
-        sw    $a0, 16($sp)
+        subu  $sp, $sp, 12
+        sw    $ra, 8($sp)
+        sw    $a0, 4($sp)
 
-        lw    $v0, 16($sp)
-        bgtz  $v0, Lcalc
+        bgtz  $a0, Lthen
+        j     Lelse 
 
-        li    $v0, 1
-        j     Lexit
-
-Lcalc:
-        lw    $v1, 16($sp)
-        subu  $v0, $v1, 1
-        move  $a0, $v0
+Lthen:
+        lw    $v1, 4($sp)
+        subu  $a0, $v1, 1
         jal   fact
 
-        lw    $v1, 16($sp)   
+        lw    $v1, 4($sp)   
         mul   $v0, $v0, $v1
+        j     Lreturn
+        
+Lelse:
+        li    $v0, 1
+        j     Lreturn
 
-Lexit:
-        lw    $ra, 20($sp) 
-        addiu $sp, $sp, 32  
+Lreturn:
+        lw    $ra, 8($sp) 
+        addiu $sp, $sp, 12
         j     $ra
 
-print:
+print_string:
         li      $v0, 4
+        syscall
+        j       $ra
+
+print_int:
+        li      $v0, 1
         syscall
         j       $ra
         
