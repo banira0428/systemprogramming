@@ -338,56 +338,56 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
       6	space:
       7	        .asciiz " "
       8	
-      9		.text
-     10		.align	2
+      9	　　.text
+     10	　　.align	2
      11	
      12	test_prime:				    # int test_prime(int n = $a0)
      13	
      14		li	$a3,2			    # forのループ数カウンタ
      15	
      16	for:
-     17	    slt	$v0,$a3,$a1	        # if !(i < n)
-     18		beq	$v0,$zero,return1	#   return 1
+     17	      slt	$v0,$a3,$a1	        # if !(i < n)
+     18	      beq	$v0,$zero,return1	#   return 1
      19	
-     20	    div	$a1,$a3			    # $a0 = 
+     20	      div	$a1,$a3			    # $a0 = 
      21		mfhi	$v0			    # $v0 = n % i
      22		beq	$v0,$zero,return0	# if ($v0 == 0) return 0
      23	
-     24	    addi	$a3, $a3, 1		# $a1 = $a1 + 0
-     25	    j   for
+     24	      addi	$a3, $a3, 1		# $a1 = $a1 + 0
+     25	      j     for
      26	
      27	while:
      28		slt	$v0,$a2,$a0		    # if !(i < n)
      29		beq	$v0,$zero,return1	#   return 1
      30	
-     31	    jal test_prime
-     32	    beq $v0,$s1,match
+     31	      jal   test_prime
+     32	      beq   $v0,$s1,match
      33	
-     34	    addi	$a1, $a1, 1		# $a1 = $a1 + 1
+     34	      addi	$a1, $a1, 1		# $a1 = $a1 + 1
      35		j	while			    # goto while
      36	
      37	match: 
-     38	    move    $s2, $a0
-     39	    move    $a0, $a1
-     40	    jal     print_int
-     41	    la      $a0, space
-     42	    jal     print_string
-     43	    move    $a0, $s2
+     38	      move    $s2, $a0
+     39	      move    $a0, $a1
+     40	      jal     print_int
+     41	      la      $a0, space
+     42	      jal     print_string
+     43	      move    $a0, $s2
      44	
-     45	    addi	$a1, $a1, 1			# $a1 = $a1 + 0
-     46	    addi	$a2, $a2, 1			# $a1 = $a1 + 0
-     47	    j       while
+     45	      addi	  $a1, $a1, 1			# $a1 = $a1 + 0
+     46	      addi	  $a2, $a2, 1			# $a1 = $a1 + 0
+     47	      j       while
      48	
      49	main:
-     50	    move    $s0, $ra
-     51	    li      $s1, 1
-     52	    la		$a0, 100 
-     53	    li      $a1, 2      # whileのループ数カウンタ
-     54	    li      $a2, 0      # match数
-     55	    jal     while
-     56	    la      $a0, newline
-     57	    jal     print_string
-     58	    j	$s0				# jump to $s0
+     50	      move    $s0, $ra
+     51	      li      $s1, 1
+     52	      la      $a0, 100 
+     53	      li      $a1, 2      # whileのループ数カウンタ
+     54	      li      $a2, 0      # match数
+     55	      jal     while
+     56	      la      $a0, newline
+     57	      jal     print_string
+     58	      j	  $s0				# jump to $s0
      59	
      60	
      61	return0:
@@ -399,19 +399,24 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
      67		j	$ra
      68	
      69	print_string:
-     70	    li      $v0, 4
-     71	    syscall
-     72	    j       $ra
+     70	      li      $v0, 4
+     71	      syscall
+     72	      j       $ra
      73	
      74	print_int:
-     75	    li      $v0, 1
-     76	    syscall
-     77	    j       $ra 
+     75	      li      $v0, 1
+     76	      syscall
+     77	      j       $ra
 \end{verbatim}
 
 \subsection{プログラムの解説}
+上記のプログラムの内容について，処理の流れを追いながら詳細に解説する．
 
-
+\begin{enumerate}
+      \item 各種変数の初期化を行う．（$\$a0$：表示する素数の上限，$\$a1$：whileループのループ数カウンタ，$\$a2$：見つかった素数の数）（52-54行目）
+      \item $while$ラベルジャンプする．（55行目）
+      \item 
+\end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{課題1-5}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -448,17 +453,5 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{感想}
 ラベル名をわかりやすくしよう，多少冗長になってもジャンプ先を記録しておきたい，高級言語のありがたみarigatami
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%--------------------------------------------------------------%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{作成したプログラム}\label{sec:sourcecode}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-{\fontsize{10pt}{11pt} \selectfont
-\begin{verbatim}
-\end{verbatim}
-}
 
 \end{document}
