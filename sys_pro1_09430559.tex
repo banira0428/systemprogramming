@@ -456,7 +456,124 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
      16: }
 \end{verbatim}
 
+\subsection{作成したプログラム}
 
+\begin{verbatim}
+      1	    .data
+      2	    .align  2
+      3	newline:
+      4	        .asciiz "\n"
+      5	    .data
+      6	    .align  2
+      7	input:
+      8	        .asciiz "> "
+      9	    .data
+     10	    .align  2    
+     11	primes:
+     12	        .space 400
+     13	
+     14		.text
+     15		.align	2
+     16	
+     17	test_prime:				    
+     18		li	$a3, 2			    # forのループ数カウンタ
+     19	
+     20	for:
+     21	    slt	$v0,$a3,$a1	        
+     22		beq	$v0,$zero,return1	
+     23	
+     24	    div	$a1,$a3			    
+     25		mfhi	$v0			    
+     26		beq	$v0,$zero,return0	
+     27	
+     28	    addi	$a3, $a3, 1
+     29	    j   for
+     30	
+     31	while:
+     32		slt	$v0,$a2,$a0		    
+     33		beq	$v0,$zero,return1	
+     34	
+     35	    move $s3, $ra
+     36	    jal test_prime
+     37	    move $ra, $s3
+     38	    beq $v0,$s1,match
+     39	
+     40	    addi	$a1, $a1, 1		
+     41		j	while			    
+     42	
+     43	match: 
+     44	
+     45	    move    $s3, $ra
+     46	    move    $a3, $a2
+     47	    jal     get_address   
+     48	    move    $ra, $s3
+     49	    sw      $a1, 0($v0)
+     50	    
+     51	    addi	$a1, $a1, 1			
+     52	    addi	$a2, $a2, 1			
+     53	    j       while
+     54	
+     55	main:
+     56	    move    $s0, $ra
+     57	    li      $s1, 1
+     58	    la		$a0, 100 
+     59	    li      $a1, 2          # whileのループ数カウンタ
+     60	    li      $a2, 0          # match数
+     61	    la      $t1, primes     # 配列の先頭アドレス
+     62	    jal     while
+     63	    j		find			
+     64	    
+     65	find:     
+     66	    la      $a0, input
+     67	    jal     print_string
+     68	    jal     read_int
+     69	    move    $a3, $v0
+     70	    addi    $a3, $a3, -1   # $a3 を一つ減算
+     71	    jal		get_address	
+     72	    lw		$a0, 0($v0) 
+     73	    jal     print_int
+     74	    la      $a0, newline
+     75	    jal     print_string
+     76	    j       find
+     77	
+     78	get_address:
+     79	    addu    $a3, $a3, $a3  # $a0 (match) を倍に
+     80	    addu    $a3, $a3, $a3  # $a0 を更に倍に ($a0 = match * 4)
+     81	    addu    $a3, $t1, $a3  # $a0 = $t1 + $a0
+     82	    move    $v0, $a3
+     83	    j		$ra				# jump to $ra
+     84	    
+     85	return0:
+     86		li	$v0,0
+     87		j	$ra
+     88	
+     89	return1:
+     90		li	$v0,1
+     91		j	$ra
+     92	
+     93	print_string:
+     94	    li      $v0, 4
+     95	    syscall
+     96	    j       $ra
+     97	
+     98	print_int:
+     99	    li      $v0, 1
+    100	    syscall
+    101	    j       $ra
+    102	
+    103	read_int:
+    104	    li		$v0, 5
+    105	    syscall
+    106	    j       $ra 
+\end{verbatim}
+
+\subsection{プログラムの解説}
+上記のプログラムについて，課題1-4との変更点の部分を中心に解説する．
+
+一つ目の違いとしては，素数を発見した時の処理である．1-4のプログラムでは，
+発見したタイミングでその素数を出力するので，その値を保持しておく必要がないのに対して，上記のプログラムでは，
+後のユーザー入力に対する処理で使用するため，見つけた素数を全て保持しておく必要がある．
+今回のプログラムではメモリ上に値を保持することで
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{感想}

@@ -28,7 +28,9 @@ while:
 	slt	$v0,$a2,$a0		    # if !(i < n)
 	beq	$v0,$zero,return1	#   return 1
 
+    move $s3, $ra
     jal test_prime
+    move $ra, $s3
     beq $v0,$s1,match
 
     addi	$a1, $a1, 1		# $a1 = $a1 + 1
