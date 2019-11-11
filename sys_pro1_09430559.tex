@@ -338,75 +338,75 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
       6	space:
       7	        .asciiz " "
       8	
-      9	　　.text
-     10	　　.align	2
+      9		.text
+     10		.align	2
      11	
-     12	test_prime:				    # int test_prime(int n = $a0)
-     13	
-     14		li	$a3,2			    # forのループ数カウンタ
-     15	
-     16	for:
-     17	      slt	$v0,$a3,$a1	        # if !(i < n)
-     18	      beq	$v0,$zero,return1	#   return 1
-     19	
-     20	      div	$a1,$a3			    # $a0 = 
-     21		mfhi	$v0			    # $v0 = n % i
-     22		beq	$v0,$zero,return0	# if ($v0 == 0) return 0
-     23	
-     24	      addi	$a3, $a3, 1		# $a3 = $a3 + 0
-     25	      j     for
-     26	
-     27	while:
-     28		slt	$v0,$a2,$a0		    # if !(i < n)
-     29		beq	$v0,$zero,return1	#   return 1
-     30	
-     31	      jal   test_prime
-     32	      beq   $v0,$s1,match
+     12	test_prime:				    
+     13		li	$a3,2			    
+     14	
+     15	for:
+     16	    slt	$v0,$a3,$a1	        
+     17		beq	$v0,$zero,return1	
+     18	
+     19	    div	$a1,$a3			    
+     20		mfhi	$v0			    
+     21		beq	$v0,$zero,return0	
+     22	
+     23	    addi	$a3, $a3, 1		
+     24	    j   for
+     25	
+     26	return0:
+     27		li	$v0,0
+     28		j	$ra
+     29	
+     30	return1:
+     31		li	$v0,1
+     32		j	$ra
      33	
-     34	      addi	$a1, $a1, 1		# $a1 = $a1 + 1
-     35		j	while			    # goto while
-     36	
-     37	match: 
-     38	      move    $s2, $a0
-     39	      move    $a0, $a1
-     40	      jal     print_int
-     41	      la      $a0, space
-     42	      jal     print_string
-     43	      move    $a0, $s2
-     44	
-     45	      addi	  $a1, $a1, 1			# $a1 = $a1 + 0
-     46	      addi	  $a2, $a2, 1			# $a2 = $a2 + 0
-     47	      j       while
+     34	main:
+     35	    move    $s0, $ra
+     36	    li      $s1, 1
+     37	    la		$a0, 100 
+     38	    li      $a1, 2      
+     39	    li      $a2, 0      
+     40	    j       while
+     41	
+     42	while:
+     43		slt	$v0,$a2,$a0		    
+     44		beq	$v0,$zero,output	
+     45	
+     46	    jal test_prime
+     47	    beq $v0,$s1,match
      48	
-     49	main:
-     50	      move    $s0, $ra
-     51	      li      $s1, 1
-     52	      la      $a0, 100 
-     53	      li      $a1, 2      # whileのループ数カウンタ
-     54	      li      $a2, 0      # match数
-     55	      jal     while
-     56	      la      $a0, newline
-     57	      jal     print_string
-     58	      j	  $s0				# jump to $s0
+     49	    addi	$a1, $a1, 1		
+     50		j	while			    
+     51	
+     52	match: 
+     53	    move    $s2, $a0
+     54	    move    $a0, $a1
+     55	    jal     print_int
+     56	    la      $a0, space
+     57	    jal     print_string
+     58	    move    $a0, $s2
      59	
-     60	
-     61	return0:
-     62	      li	$v0,0
-     63	      j	$ra
-     64	
-     65	return1:
-     66	      li	$v0,1
-     67	      j	$ra
+     60	    addi	$a1, $a1, 1			
+     61	    addi	$a2, $a2, 1			
+     62	    j       while
+     63	
+     64	output:
+     65	    la      $a0, newline
+     66	    jal     print_string
+     67	    j	    $s0				
      68	
      69	print_string:
-     70	      li      $v0, 4
-     71	      syscall
-     72	      j       $ra
+     70	    li      $v0, 4
+     71	    syscall
+     72	    j       $ra
      73	
      74	print_int:
-     75	      li      $v0, 1
-     76	      syscall
-     77	      j       $ra
+     75	    li      $v0, 1
+     76	    syscall
+     77	    j       $ra 
 \end{verbatim}
 
 \subsection{プログラムの解説}
@@ -475,96 +475,90 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
      14		.text
      15		.align	2
      16	
-     17	test_prime:				    
-     18		li	$a3, 2			    # forのループ数カウンタ
-     19	
-     20	for:
-     21	    slt	$v0,$a3,$a1	        
-     22		beq	$v0,$zero,return1	
-     23	
-     24	    div	$a1,$a3			    
-     25		mfhi	$v0			    
-     26		beq	$v0,$zero,return0	
-     27	
-     28	    addi	$a3, $a3, 1
-     29	    j   for
-     30	
-     31	while:
-     32		slt	$v0,$a2,$a0		    
-     33		beq	$v0,$zero,return1	
-     34	
-     35	    move $s3, $ra
-     36	    jal test_prime
-     37	    move $ra, $s3
-     38	    beq $v0,$s1,match
+     17	test_prime:	
+     18	
+     19		li	$a3, 2			    # forのループ数カウンタ
+     20	
+     21	Lfor:
+     22	    slt	$v0,$a3,$a1	        
+     23		beq	$v0,$zero,return1	
+     24	
+     25	    div	$a1,$a3			    
+     26		mfhi	$v0			    
+     27		beq	$v0,$zero,return0	
+     28	
+     29	    addi	$a3, $a3, 1
+     30	    j   Lfor	
+     31	
+     32	return0:
+     33		li	$v0,0
+     34		j	$ra
+     35	
+     36	return1:
+     37		li	$v0,1
+     38		j	$ra	    
      39	
-     40	    addi	$a1, $a1, 1		
-     41		j	while			    
-     42	
-     43	match: 
-     44	
-     45	    move    $s3, $ra
-     46	    move    $a3, $a2
-     47	    jal     get_address   
-     48	    move    $ra, $s3
-     49	    sw      $a1, 0($v0)
-     50	    
-     51	    addi	$a1, $a1, 1			
-     52	    addi	$a2, $a2, 1			
-     53	    j       while
-     54	
-     55	main:
-     56	    move    $s0, $ra
-     57	    li      $s1, 1
-     58	    la		$a0, 100 
-     59	    li      $a1, 2          # whileのループ数カウンタ
-     60	    li      $a2, 0          # match数
-     61	    la      $t1, primes     # 配列の先頭アドレス
-     62	    jal     while
-     63	    j		find			
-     64	    
-     65	find:     
-     66	    la      $a0, input
-     67	    jal     print_string
-     68	    jal     read_int
-     69	    move    $a3, $v0
-     70	    addi    $a3, $a3, -1   # $a3 を一つ減算
-     71	    jal		get_address	
-     72	    lw		$a0, 0($v0) 
-     73	    jal     print_int
-     74	    la      $a0, newline
-     75	    jal     print_string
-     76	    j       find
-     77	
-     78	get_address:
-     79	    addu    $a3, $a3, $a3  # $a0 (match) を倍に
-     80	    addu    $a3, $a3, $a3  # $a0 を更に倍に ($a0 = match * 4)
-     81	    addu    $a3, $t1, $a3  # $a0 = $t1 + $a0
-     82	    move    $v0, $a3
-     83	    j		$ra				# jump to $ra
-     84	    
-     85	return0:
-     86		li	$v0,0
-     87		j	$ra
-     88	
-     89	return1:
-     90		li	$v0,1
-     91		j	$ra
-     92	
-     93	print_string:
-     94	    li      $v0, 4
-     95	    syscall
-     96	    j       $ra
-     97	
-     98	print_int:
-     99	    li      $v0, 1
-    100	    syscall
-    101	    j       $ra
-    102	
-    103	read_int:
-    104	    li		$v0, 5
-    105	    syscall
-    106	    j       $ra 
+     40	main:
+     41	    move    $s0, $ra
+     42	    li      $s1, 1
+     43	    la		$a0, 100 
+     44	    li      $a1, 2          # whileのループ数カウンタ
+     45	    li      $a2, 0          # match数
+     46	    la      $t1, primes     # 配列の先頭アドレス
+     47	    j       while
+     48	
+     49	while:
+     50		slt	$v0,$a2,$a0		    
+     51		beq	$v0,$zero,find	
+     52	
+     53	    jal test_prime
+     54	    beq $v0,$s1,match
+     55	
+     56	    addi	$a1, $a1, 1		
+     57		j	while	
+     58	
+     59	match: 
+     60	    move    $a3, $a2
+     61	    jal     get_address   
+     62	    sw      $a1, 0($v0)
+     63	    addi	$a1, $a1, 1			
+     64	    addi	$a2, $a2, 1			
+     65	    j       while
+     66	    
+     67	find:     
+     68	    la      $a0, input
+     69	    jal     print_string
+     70	    jal     read_int
+     71	    move    $a3, $v0
+     72	    addi    $a3, $a3, -1 
+     73	    jal		get_address	
+     74	    lw		$a0, 0($v0) 
+     75	    jal     print_int
+     76	    la      $a0, newline
+     77	    jal     print_string
+     78	    j       find
+     79	
+     80	get_address:
+     81	    addu    $a3, $a3, $a3  # $a3 (match) を倍に
+     82	    addu    $a3, $a3, $a3  # $a3 を更に倍に ($a3 = match * 4)
+     83	    addu    $a3, $t1, $a3  # $a3 = $t1 + $a3
+     84	    move    $v0, $a3
+     85	    j		$ra				# jump to $ra
+     86	
+     87	print_string:
+     88	    li      $v0, 4
+     89	    syscall
+     90	    j       $ra
+     91	
+     92	print_int:
+     93	    li      $v0, 1
+     94	    syscall
+     95	    j       $ra
+     96	
+     97	read_int:
+     98	    li		$v0, 5
+     99	    syscall
+    100	    j       $ra
 \end{verbatim}
 
 \subsection{プログラムの解説}
