@@ -44,21 +44,21 @@ while:
 	beq	$v0,$zero,output	
 
     jal test_prime
-    beq $v0,$s1,match
+    beq $v0,$s1,then
+    j   default		    
 
-    addi	$a1, $a1, 1		
-	j	while			    
-
-match: 
+then: 
     move    $s2, $a0
     move    $a0, $a1
     jal     print_int
     la      $a0, space
     jal     print_string
     move    $a0, $s2
+    addi	$a2, $a2, 1
+    j       default
 
-    addi	$a1, $a1, 1			
-    addi	$a2, $a2, 1			
+default:
+    addi    $a1, $a1, 1
     j       while
 
 output:
