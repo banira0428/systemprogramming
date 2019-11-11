@@ -69,6 +69,7 @@ find:
     la      $a0, input
     jal     print_string
     jal     read_int
+    beq     $v0, $zero, exit
     move    $a3, $v0
     addi    $a3, $a3, -1 
     jal     get_address
@@ -77,6 +78,10 @@ find:
     la      $a0, newline
     jal     print_string
     j       find
+
+exit:
+    j       $s0  
+    
 
 get_address:
     addu    $a3, $a3, $a3  
