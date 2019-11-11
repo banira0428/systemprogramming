@@ -45,7 +45,7 @@ while:
 
     jal  test_prime
     beq  $v0,$s1,then
-    j    default    
+    j    default
 
 then: 
     move $s2, $a0
@@ -55,7 +55,7 @@ then:
     jal  print_string
     move $a0, $s2
     addi $a2, $a2, 1
-    j       default
+    j    default
 
 default:
     addi $a1, $a1, 1
