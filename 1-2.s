@@ -3,8 +3,7 @@
 _print_message:
     la      $a0, msg
     li      $v0, 4
-    .data
-    .align 2
+
 msg:
     .asciiz "Hello!!\n"
     .text
