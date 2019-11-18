@@ -7,7 +7,7 @@ msg_input:
         .asciiz "> "
      
 msg_error:
-        .asciiz "please input 0 to 100"
+        .asciiz "please input 1 to 100"
     
 msg_exit:
         .asciiz "exit"
