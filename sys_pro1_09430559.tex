@@ -226,56 +226,55 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
       9	        .align 2
      10	main:
      11	        move    $s0, $ra
-     12	        li      $s1, 1
-     13	        la      $a0, msg
-     14	        jal     print_string
-     15	        li      $a0, 10
-     16	        jal     fact
-     17	        move    $a0, $v0
-     18	        jal     print_int
-     19	        la      $a0, newline
-     20	        jal     print_string
-     21	        j       $s0
-     22	
-     23	fact:
-     24	        subu  $sp, $sp, 32
-     25	        sw    $fp, 16($sp)
-     26	        sw    $ra, 20($sp)
-     27	
-     28	        addu  $fp, $sp, 28
-     29	        sw    $a0, 0($fp)
-     30	
-     31	        bgtz  $a0, Lthen
-     32	        j     Lelse 
-     33	
-     34	Lthen:
-     35	        subu  $a0, $a0, 1
-     36	        jal   fact
-     37	
-     38	        lw    $v1, 0($fp)   
-     39	        mul   $v0, $v0, $v1
-     40	        j     Lreturn
-     41	        
-     42	Lelse:
-     43	        li    $v0, 1
-     44	        j     Lreturn
-     45	
-     46	Lreturn:
-     47	        lw    $fp, 16($sp)
-     48	        lw    $ra, 20($sp) 
-     49	        addiu $sp, $sp, 32
-     50	        j     $ra
-     51	
-     52	print_string:
-     53	        li      $v0, 4
-     54	        syscall
-     55	        j       $ra
-     56	
-     57	print_int:
-     58	        li      $v0, 1
-     59	        syscall
-     60	        j       $ra
-     61	         
+     12	        la      $a0, msg
+     13	        jal     print_string
+     14	        li      $a0, 10
+     15	        jal     fact
+     16	        move    $a0, $v0
+     17	        jal     print_int
+     18	        la      $a0, newline
+     19	        jal     print_string
+     20	        j       $s0
+     21	
+     22	fact:
+     23	        subu  $sp, $sp, 32
+     24	        sw    $fp, 16($sp)
+     25	        sw    $ra, 20($sp)
+     26	
+     27	        addu  $fp, $sp, 28
+     28	        sw    $a0, 0($fp)
+     29	
+     30	        bgtz  $a0, Lthen
+     31	        j     Lelse 
+     32	
+     33	Lthen:
+     34	        subu  $a0, $a0, 1
+     35	        jal   fact
+     36	
+     37	        lw    $v1, 0($fp)   
+     38	        mul   $v0, $v0, $v1
+     39	        j     Lreturn
+     40	        
+     41	Lelse:
+     42	        li    $v0, 1
+     43	        j     Lreturn
+     44	
+     45	Lreturn:
+     46	        lw    $fp, 16($sp)
+     47	        lw    $ra, 20($sp) 
+     48	        addiu $sp, $sp, 32
+     49	        j     $ra
+     50	
+     51	print_string:
+     52	        li      $v0, 4
+     53	        syscall
+     54	        j       $ra
+     55	
+     56	print_int:
+     57	        li      $v0, 1
+     58	        syscall
+     59	        j       $ra
+     60	         
 \end{verbatim}
 
 \subsection{実行結果}
@@ -288,17 +287,17 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
 ここでは$fact$関数内で行われている処理に対応している部分について，処理の流れを追いながら詳細に解説する．
 
 \begin{enumerate}
-      \item \label{push_start} $\$sp$の値を減算し，スタックを32バイト分確保した後，そこに$\$fp$と$\$ra$，$\$a0$の値を退避させる．（24-29行目）
-      \item $\$a0$の値を確認し，その値が$0$かどうかで処理を分岐する．（31-32行目）
+      \item \label{push_start} $\$sp$の値を減算し，スタックを32バイト分確保した後，そこに$\$fp$と$\$ra$，$\$a0$の値を退避させる．（23-28行目）
+      \item $\$a0$の値を確認し，その値が$0$かどうかで処理を分岐する．（30-31行目）
       \item \label{push_b}$\$a0$の値が$0$より大きいので，$Lthen$ラベルの場所にジャンプする．
-      \item \label{push_end}$\$a0$の値を一つ減らし，その後$fact$を再帰的に呼び出す（35-36行目）
+      \item \label{push_end}$\$a0$の値を一つ減らし，その後$fact$を再帰的に呼び出す（34-35行目）
       \item \ref{push_start} から \ref{push_end} までの処理を$\$a0$の値が$0$になるまで繰り返す．
       \item $\$a0$の値が$0$になった時，\ref{push_b}のタイミングで$Lthen$ラベルでは無く$Lelse$ラベルの場所にジャンプする．
-      \item $\$v0$に$1$を格納した後，$Lreturn$ラベルの場所にジャンプする．（43-44行目）
-      \item \label{pop_start}直近にスタックに退避させた値（32バイト分）をレジスタに復帰させた後，$\$sp$の値を加算し，使用済みスタック領域の解放を行う．（47-49行目）
-      \item \label{pop_b}$\$ra$レジスタに格納されている，\ref{push_end}の$fact$にジャンプする命令の次の命令のアドレスに移動する．（50行目）
-      \item スタックに退避しておいた$\$a0$の値を$\$v1$に格納し，$\$v0$の値を自身と$\$v1$の積の値に上書きする．（38-39行目）
-      \item \label{pop_end}$Lreturn$ラベルの場所にジャンプする．（40行目）
+      \item $\$v0$に$1$を格納した後，$Lreturn$ラベルの場所にジャンプする．（42-43行目）
+      \item \label{pop_start}直近にスタックに退避させた値（32バイト分）をレジスタに復帰させた後，$\$sp$の値を加算し，使用済みスタック領域の解放を行う．（46-48行目）
+      \item \label{pop_b}$\$ra$レジスタに格納されている，\ref{push_end}の$fact$にジャンプする命令の次の命令のアドレスに移動する．（49行目）
+      \item スタックに退避しておいた$\$a0$の値を$\$v1$に格納し，$\$v0$の値を自身と$\$v1$の積の値に上書きする．（37-38行目）
+      \item \label{pop_end}$Lreturn$ラベルの場所にジャンプする．（39行目）
       \item \ref{pop_start}から\ref{pop_end}までの処理を繰り返す．
       \item 一番最初にスタックに退避させた$\$ra$には一番最初に$fact$を呼び出した時の次の命令のアドレスが格納されているので，
       このプログラムで確保したスタック領域を解放しきった後，\ref{pop_b}のタイミングで17行目の命令に移動し，$fact$の一連の処理が終了する．（計算結果は$\$v0$に格納されている）
@@ -359,7 +358,7 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
      10	    .align  2
      11	
      12	test_prime:    
-     13	    li   $a3,2    
+     13	    li   $a3, 2    
      14	
      15	for:
      16	    slt  $v0, $a3, $a1        

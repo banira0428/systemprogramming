@@ -10,7 +10,7 @@ space:
     .align  2
 
 test_prime:    
-    li   $a3,2    
+    li   $a3, 2    
 
 for:
     slt  $v0, $a3, $a1        

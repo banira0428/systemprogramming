@@ -9,7 +9,6 @@ newline:
         .align 2
 main:
         move    $s0, $ra
-        li      $s1, 1
         la      $a0, msg
         jal     print_string
         li      $a0, 10
