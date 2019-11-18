@@ -2,20 +2,16 @@
     .align  2
 newline:
         .asciiz "\n"
-    .data
-    .align  2
+
 msg_input:
         .asciiz "> "
-    .data
-    .align  2      
+     
 msg_error:
         .asciiz "please input 0 to 100"
-    .data
-    .align  2      
+    
 msg_exit:
         .asciiz "exit"
-    .data
-    .align  2
+
 primes:
         .space 400
 
