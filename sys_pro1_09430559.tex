@@ -382,58 +382,55 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
      33	
      34	main:
      35	    move $s0, $ra
-     36	    li   $s1, 1
-     37	    li   $s2, 10
-     38	    la   $a0, 100 
+     36	    li   $t0, 1
+     37	    li   $t1, 10
+     38	    la   $t2, 100 
      39	    li   $a1, 2      
      40	    li   $a2, 0      
      41	    j    while
      42	
      43	while:
-     44	    slt  $v0, $a2, $a0    
+     44	    slt  $v0, $a2, $t2    
      45	    beq  $v0, $zero, exit
      46	
      47	    jal  test_prime
-     48	    beq  $v0,$s1,then
+     48	    beq  $v0,$t0,then
      49	    j    default
      50	
      51	then: 
-     52	    move $s3, $a0
-     53	    move $a0, $a1
-     54	    jal  print_int
-     55	    la   $a0, space
-     56	    jal  print_string
-     57	    addi $a2, $a2, 1
-     58	    div  $a2, $s2
-     59	    mfhi $v0
-     60	    beq  $v0, $zero, wrap
-     61	    move $a0, $s3
-     62	    j    default
-     63	
-     64	wrap:
-     65	    la   $a0, newline
-     66	    jal  print_string
-     67	    move $a0, $s3
-     68	    j    default
-     69	
-     70	default:
-     71	    addi $a1, $a1, 1
-     72	    j    while
-     73	
-     74	exit:
-     75	    la   $a0, newline
-     76	    jal  print_string
-     77	    j    $s0
-     78	
-     79	print_string:
-     80	    li   $v0, 4
-     81	    syscall
-     82	    j    $ra
-     83	
-     84	print_int:
-     85	    li   $v0, 1
-     86	    syscall
-     87	    j    $ra 
+     52	    move $a0, $a1
+     53	    jal  print_int
+     54	    la   $a0, space
+     55	    jal  print_string
+     56	    addi $a2, $a2, 1
+     57	    div  $a2, $t1
+     58	    mfhi $v0
+     59	    beq  $v0, $zero, wrap
+     60	    j    default
+     61	
+     62	wrap:
+     63	    la   $a0, newline
+     64	    jal  print_string
+     65	    j    default
+     66	
+     67	default:
+     68	    addi $a1, $a1, 1
+     69	    j    while
+     70	
+     71	exit:
+     72	    la   $a0, newline
+     73	    jal  print_string
+     74	    j    $s0
+     75	
+     76	print_string:
+     77	    li   $v0, 4
+     78	    syscall
+     79	    j    $ra
+     80	
+     81	print_int:
+     82	    li   $v0, 1
+     83	    syscall
+     84	    j    $ra 
 \end{verbatim}
 
 \subsection{実行結果}
@@ -455,10 +452,10 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
 上記のプログラムの内容について，処理の流れを追いながら詳細に解説する．
 
 \begin{enumerate}
-      \item 各種変数の初期化を行う．（$\$a0$：表示する素数の上限，$\$a1$：whileループのループ数カウンタ，$\$a2$：見つかった素数の数）
+      \item 各種変数の初期化を行う．
       \item $while$ラベルへジャンプする．
-      \item \label{begin_while}見つかった素数の数が表示する上限を超えているかどうか確認する．（$\$a2$と$\$a0$を比較している）
-      \item $\$a2 < \$a0$なので，ループの中に入り$test\_prime$ラベルにジャンプする．
+      \item \label{begin_while}見つかった素数の数が表示する上限を超えているかどうか確認する．（$\$a2$と$\$t0$を比較している）
+      \item $\$a2 < \$t0$なので，ループの中に入り$test\_prime$ラベルにジャンプする．
       \item $\$a1$ が素数かどうかを確かめるために必要な変数 $\$a3$（除数）を初期化する．
       \item $\$a1$ の値が $\$a3$ で割り切れるかを確かめ，割り切れた場合は $\$v0$ に $0$ を格納し，$test\_prime$ラベルの呼び出し元へ帰る．
       \item 割り切れない場合は$\$a3$の値を加算し続けながら割り切れるかどうかを確かめ，割り切れないまま$\$a3$の値が$\$a1$の値までたどり着いた時，
@@ -466,7 +463,7 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
       \item $\$v0$の値が$1$ならば（$\$a1$が素数ならば），$match$ラベルにジャンプした後，$\$a1$の値を画面に出力し，$\$a2$の値を加算する．
       \item $\$a2$の値が$\$s2$の値（$10$）で割り切れるのであれば，改行する．
       \item \label{end_while}$\$a1$の値を加算し，\ref{begin_while}まで戻る．
-      \item \ref{begin_while}から\ref{end_while}までを繰り返し，$\$a2$の値が$\$a0$以上になった時，プログラムを終了する．
+      \item \ref{begin_while}から\ref{end_while}までを繰り返し，$\$a2$の値が$\$t0$以上になった時，プログラムを終了する．
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{課題1-5}
@@ -507,106 +504,125 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
       4	        .asciiz "\n"
       5	    .data
       6	    .align  2
-      7	input:
+      7	msg_input:
       8	        .asciiz "> "
       9	    .data
-     10	    .align  2    
-     11	primes:
-     12	        .space 400
-     13	
-     14	    .text
-     15	    .align  2
-     16	
-     17	test_prime:
-     18	
-     19	    li  $a3, 2
-     20	
-     21	Lfor:
-     22	    slt $v0,$a3,$a1    
-     23	    beq $v0,$zero,return1
+     10	    .align  2      
+     11	msg_error:
+     12	        .asciiz "please input 0 to 100"
+     13	    .data
+     14	    .align  2      
+     15	msg_exit:
+     16	        .asciiz "exit"
+     17	    .data
+     18	    .align  2
+     19	primes:
+     20	        .space 400
+     21	
+     22	    .text
+     23	    .align  2
      24	
-     25	    div $a1,$a3    
-     26	    mfhi    $v0  
-     27	    beq $v0,$zero,return0
+     25	test_prime:
+     26	
+     27	    li  $a3, 2
      28	
-     29	    addi    $a3, $a3, 1
-     30	    j   Lfor
-     31	
-     32	return0:
-     33	    li  $v0,0
-     34	    j   $ra
-     35	
-     36	return1:
-     37	    li  $v0,1
-     38	    j   $ra 
+     29	Lfor:
+     30	    slt $v0,$a3,$a1    
+     31	    beq $v0,$zero,return1
+     32	
+     33	    div $a1,$a3    
+     34	    mfhi    $v0  
+     35	    beq $v0,$zero,return0
+     36	
+     37	    addi    $a3, $a3, 1
+     38	    j   Lfor
      39	
-     40	main:
-     41	    move    $s0, $ra
-     42	    li      $s1, 1
-     43	    la      $a0, 100 
-     44	    li      $a1, 2          # whileのループ数カウンタ
-     45	    li      $a2, 0          # match数
-     46	    la      $t1, primes     # 配列の先頭アドレス
-     47	    j       while
-     48	
-     49	while:
-     50	    slt     $v0, $a2, $a0    
-     51	    beq     $v0, $zero, find
-     52	
-     53	    jal     test_prime
-     54	    beq     $v0, $s1, then
-     55	    j       default
+     40	return0:
+     41	    li  $v0,0
+     42	    j   $ra
+     43	
+     44	return1:
+     45	    li  $v0,1
+     46	    j   $ra 
+     47	
+     48	main:
+     49	    move    $s0, $ra
+     50	    la      $t0, primes     
+     51	    li      $t1, 1
+     52	    la      $t2, 100 
+     53	    li      $a1, 2          
+     54	    li      $a2, 0          
+     55	    j       while
      56	
-     57	then:
-     58	    move    $a3, $a2
-     59	    jal     get_address   
-     60	    sw      $a1, 0($v0)
-     61	    addi    $a2, $a2, 1
-     62	    j       default
-     63	    
-     64	default:
-     65	    addi    $a1, $a1, 1
-     66	    j       while
-     67	    
-     68	find:     
-     69	    la      $a0, input
-     70	    jal     print_string
-     71	    jal     read_int
-     72	    beq     $v0, $zero, exit
-     73	    move    $a3, $v0
-     74	    addi    $a3, $a3, -1 
-     75	    jal     get_address
-     76	    lw      $a0, 0($v0) 
-     77	    jal     print_int
-     78	    la      $a0, newline
-     79	    jal     print_string
-     80	    j       find
-     81	
-     82	exit:
-     83	    j       $s0  
-     84	    
-     85	
-     86	get_address:
-     87	    addu    $a3, $a3, $a3  
-     88	    addu    $a3, $a3, $a3  
-     89	    addu    $a3, $t1, $a3  
-     90	    move    $v0, $a3
-     91	    j       $ra
-     92	
-     93	print_string:
-     94	    li      $v0, 4
-     95	    syscall
-     96	    j       $ra
-     97	
-     98	print_int:
-     99	    li      $v0, 1
-    100	    syscall
-    101	    j       $ra
-    102	
-    103	read_int:
-    104	    li      $v0, 5
-    105	    syscall
-    106	    j       $ra 
+     57	while:
+     58	    slt     $v0, $a2, $t2    
+     59	    beq     $v0, $zero, find
+     60	
+     61	    jal     test_prime
+     62	    beq     $v0, $t1, then
+     63	    j       default
+     64	
+     65	then:
+     66	    move    $a3, $a2
+     67	    jal     get_address   
+     68	    sw      $a1, 0($v0)
+     69	    addi    $a2, $a2, 1
+     70	    j       default
+     71	    
+     72	default:
+     73	    addi    $a1, $a1, 1
+     74	    j       while
+     75	    
+     76	find:
+     77	    la      $a0, msg_input
+     78	    jal     print_string
+     79	    jal     read_int
+     80	    bltz    $v0, error
+     81	    bgt     $v0, $t2, error
+     82	    beq     $v0, $zero, exit
+     83	    move    $a3, $v0
+     84	    addi    $a3, $a3, -1 
+     85	    jal     get_address
+     86	    lw      $a0, 0($v0) 
+     87	    jal     print_int
+     88	    la      $a0, newline
+     89	    jal     print_string
+     90	    j       find
+     91	
+     92	error:
+     93	    la      $a0, msg_error
+     94	    jal     print_string
+     95	    la      $a0, newline
+     96	    jal     print_string
+     97	    j       find
+     98	
+     99	exit:
+    100	    la      $a0, msg_exit
+    101	    jal     print_string
+    102	    j       $s0  
+    103	    
+    104	
+    105	get_address:
+    106	    addu    $a3, $a3, $a3  
+    107	    addu    $a3, $a3, $a3  
+    108	    addu    $a3, $t0, $a3  
+    109	    move    $v0, $a3
+    110	    j       $ra
+    111	
+    112	print_string:
+    113	    li      $v0, 4
+    114	    syscall
+    115	    j       $ra
+    116	
+    117	print_int:
+    118	    li      $v0, 1
+    119	    syscall
+    120	    j       $ra
+    121	
+    122	read_int:
+    123	    li      $v0, 5
+    124	    syscall
+    125	    j       $ra 
 \end{verbatim}
 
 \subsection{実行結果}
@@ -614,19 +630,20 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
 \begin{verbatim}
       > 1
       2
-      > 2
-      3
-      > 3
-      5
-      > 4
-      7
-      > 8
-      19
-      > 9
-      23
+      > 5
+      11
       > 10
       29
-      >  0                 
+      > 42
+      181
+      > 81
+      419
+      > 105
+      please input 0 to 100
+      > -100
+      please input 0 to 100
+      > 0
+      exit            
 \end{verbatim}
 
 \subsection{プログラムの解説}
@@ -634,12 +651,12 @@ $\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字�
 
 大きな違いとして挙げられるのは，素数を見つけた際にその値を出力するのではなく，
 後のユーザーとの対話処理で使うためにその値を保持している，という点である．
-以下に，プログラム内の配列に関する操作について解説する．
+以下に，プログラム内の配列に関する操作について詳しく解説する．
 
 \begin{enumerate}
       \item アセンブラ指令$.space$であらかじめメモリ上に適当な領域を確保し，その先頭アドレスを$primes$とする．
       今回の場合はint型（4バイト）を100個格納できれば良いので，400バイトを確保しておく．
-      \item 素数を見つけたタイミングで$\$t1 + \$a2 \times 4$のアドレスにその素数を格納する．（4をかけるのは，int型のバイト数が4だから）
+      \item 素数を見つけたタイミングで$\$t0 + \$a2 \times 4$のアドレスにその素数を格納する．（4をかけるのは，int型のバイト数が4だから）
       \item ユーザーから任意の数字（1-100）が入力された際は$\$t0 + (\$v0 - 1) \times 4$のアドレスにアクセスすることで，任意の配列の要素にアクセスすることができる．
 \end{enumerate}
 

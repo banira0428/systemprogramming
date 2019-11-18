@@ -33,38 +33,35 @@ return1:
 
 main:
     move $s0, $ra
-    li   $s1, 1
-    li   $s2, 10
-    la   $a0, 100 
+    li   $t0, 1
+    li   $t1, 10
+    la   $t2, 100 
     li   $a1, 2      
     li   $a2, 0      
     j    while
 
 while:
-    slt  $v0, $a2, $a0    
+    slt  $v0, $a2, $t2    
     beq  $v0, $zero, exit
 
     jal  test_prime
-    beq  $v0,$s1,then
+    beq  $v0,$t0,then
     j    default
 
 then: 
-    move $s3, $a0
     move $a0, $a1
     jal  print_int
     la   $a0, space
     jal  print_string
     addi $a2, $a2, 1
-    div  $a2, $s2
+    div  $a2, $t1
     mfhi $v0
     beq  $v0, $zero, wrap
-    move $a0, $s3
     j    default
 
 wrap:
     la   $a0, newline
     jal  print_string
-    move $a0, $s3
     j    default
 
 default:

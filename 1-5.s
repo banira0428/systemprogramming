@@ -4,10 +4,18 @@ newline:
         .asciiz "\n"
     .data
     .align  2
-input:
+msg_input:
         .asciiz "> "
     .data
-    .align  2    
+    .align  2      
+msg_error:
+        .asciiz "please input 0 to 100"
+    .data
+    .align  2      
+msg_exit:
+        .asciiz "exit"
+    .data
+    .align  2
 primes:
         .space 400
 
@@ -39,19 +47,19 @@ return1:
 
 main:
     move    $s0, $ra
-    li      $s1, 1
-    la      $a0, 100 
-    li      $a1, 2          # whileのループ数カウンタ
-    li      $a2, 0          # match数
-    la      $t1, primes     # 配列の先頭アドレス
+    la      $t0, primes     
+    li      $t1, 1
+    la      $t2, 100 
+    li      $a1, 2          
+    li      $a2, 0          
     j       while
 
 while:
-    slt     $v0, $a2, $a0    
+    slt     $v0, $a2, $t2    
     beq     $v0, $zero, find
 
     jal     test_prime
-    beq     $v0, $s1, then
+    beq     $v0, $t1, then
     j       default
 
 then:
@@ -65,10 +73,12 @@ default:
     addi    $a1, $a1, 1
     j       while
     
-find:     
-    la      $a0, input
+find:
+    la      $a0, msg_input
     jal     print_string
     jal     read_int
+    bltz    $v0, error
+    bgt     $v0, $t2, error
     beq     $v0, $zero, exit
     move    $a3, $v0
     addi    $a3, $a3, -1 
@@ -79,14 +89,23 @@ find:
     jal     print_string
     j       find
 
+error:
+    la      $a0, msg_error
+    jal     print_string
+    la      $a0, newline
+    jal     print_string
+    j       find
+
 exit:
+    la      $a0, msg_exit
+    jal     print_string
     j       $s0  
     
 
 get_address:
     addu    $a3, $a3, $a3  
     addu    $a3, $a3, $a3  
-    addu    $a3, $t1, $a3  
+    addu    $a3, $t0, $a3  
     move    $v0, $a3
     j       $ra
 
