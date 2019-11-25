@@ -8,7 +8,8 @@ newline:
         .text
         .align 2
 main:
-        move    $s0, $ra
+        subu    $sp, $sp, 32
+        sw      $ra, 20($sp)
         la      $a0, msg
         jal     print_string
         li      $a0, 10
@@ -17,7 +18,10 @@ main:
         jal     print_int
         la      $a0, newline
         jal     print_string
-        j       $s0
+        move    $ra, $s0
+        lw      $ra, 20($sp) 
+        addiu   $sp, $sp, 32
+        j       $ra
 
 fact:
         subu  $sp, $sp, 32

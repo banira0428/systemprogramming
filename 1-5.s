@@ -43,8 +43,6 @@ return1:
 
 main:
     move    $s0, $ra
-    la      $t0, primes     
-    li      $t1, 1
     la      $t2, 100 
     li      $a1, 2          
     li      $a2, 0          
@@ -55,6 +53,7 @@ while:
     beq     $v0, $zero, find
 
     jal     test_prime
+    li      $t1, 1
     beq     $v0, $t1, then
     j       default
 
@@ -99,6 +98,7 @@ exit:
     
 
 get_address:
+    la      $t0, primes     
     addu    $a3, $a3, $a3  
     addu    $a3, $a3, $a3  
     addu    $a3, $t0, $a3  
