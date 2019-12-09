@@ -1,7 +1,7 @@
 .text
 .align 2
 
-print_int:
+_print_int:
  subu    $sp,$sp,24
  sw      $ra,20($sp)
 
@@ -12,7 +12,7 @@ print_int:
  addu    $sp,$sp,24
  j       $ra 
 
-print_string:
+_print_string:
  subu    $sp,$sp,24
  sw      $ra,20($sp)
 
@@ -34,7 +34,7 @@ read_int:
  addu    $sp,$sp,24
  j       $ra 
 
-read_string:
+_read_string:
  subu    $sp,$sp,24
  sw      $ra,20($sp)
 
@@ -45,7 +45,7 @@ read_string:
  addu    $sp,$sp,24
  j       $ra
 
-exit:
+_exit:
  li      $v0, 10
  syscall
 
