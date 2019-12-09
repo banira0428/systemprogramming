@@ -23,7 +23,7 @@ _print_string:
  addu    $sp,$sp,24
  j       $ra 
 
-read_int:
+_read_int:
  subu    $sp,$sp,24
  sw      $ra,20($sp)
 
