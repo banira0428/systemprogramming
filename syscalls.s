@@ -1,7 +1,7 @@
 .text
 .align 2
 
-_print_int:
+print_int:
  subu    $sp,$sp,24
  sw      $ra,20($sp)
 
@@ -12,7 +12,7 @@ _print_int:
  addu    $sp,$sp,24
  j       $ra 
 
-_print_string:
+print_string:
  subu    $sp,$sp,24
  sw      $ra,20($sp)
 
