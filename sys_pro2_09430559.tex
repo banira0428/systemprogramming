@@ -35,8 +35,102 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{課題2-1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \subsection{課題内容}
+SPIMが提供するシステムコールを C言語から実行できるようにしたい． 教科書A.6節 「手続き呼出し規約」に従って，各種手続きをアセンブラで記述せよ． ファイル名は，{\tt syscalls.s} とすること．
+
+また，記述した {\tt syscalls.s} の関数をC言語から呼び出すことで， ハノイの塔({\tt hanoi.c} とする)を完成させよ．
+
+\subsection{C言語で記述したプログラム例}
+
+\begin{verbatim}
+      1	#include <stdio.h>
+      2	
+      3	void hanoi(int n, int start, int finish, int extra)
+      4	{
+      5	    if (n != 0)
+      6	    {
+      7	        hanoi(n - 1, start, extra, finish);
+      8	        print_string("Move disk ");
+      9	        print_int(n);
+     10	        print_string(" from peg ");
+     11	        print_int(start);
+     12	        print_string(" to peg ");
+     13	        print_int(finish);
+     14	        print_string(".\n");
+     15	        hanoi(n - 1, extra, finish, start);
+     16	    }
+     17	}
+     18	main()
+     19	{
+     20	    int n;
+     21	    print_string("Enter number of disks> ");
+     22	    n = read_int();
+     23	    hanoi(n, 1, 2, 3);
+     24	}     
+\end{verbatim}
+
+\subsection{作成したプログラム}
+\begin{verbatim}
+      1	.text
+      2	.align 2
+      3	
+      4	_print_int:
+      5	 subu    $sp,$sp,24
+      6	 sw      $ra,20($sp)
+      7	
+      8	 li      $v0, 1
+      9	 syscall
+     10	
+     11	 lw      $ra,20($sp)
+     12	 addu    $sp,$sp,24
+     13	 j       $ra 
+     14	
+     15	_print_string:
+     16	 subu    $sp,$sp,24
+     17	 sw      $ra,20($sp)
+     18	
+     19	 li      $v0, 4
+     20	 syscall
+     21	
+     22	 lw      $ra,20($sp)
+     23	 addu    $sp,$sp,24
+     24	 j       $ra 
+     25	
+     26	_read_int:
+     27	 subu    $sp,$sp,24
+     28	 sw      $ra,20($sp)
+     29	
+     30	 li      $v0, 5
+     31	 syscall
+     32	
+     33	 lw      $ra,20($sp)
+     34	 addu    $sp,$sp,24
+     35	 j       $ra 
+     36	
+     37	_read_string:
+     38	 subu    $sp,$sp,24
+     39	 sw      $ra,20($sp)
+     40	
+     41	 li      $v0, 8
+     42	 syscall
+     43	
+     44	 lw      $ra,20($sp)
+     45	 addu    $sp,$sp,24
+     46	 j       $ra
+     47	
+     48	_exit:
+     49	 li      $v0, 10
+     50	 syscall
+     51	
+     52	       
+\end{verbatim}
+
+\subsection{実行結果}
+
+
+\subsection{考察}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{課題2-2}
