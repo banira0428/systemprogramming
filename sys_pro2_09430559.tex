@@ -122,15 +122,55 @@ SPIMが提供するシステムコールを C言語から実行できるよう�
      49	 li      $v0, 10
      50	 syscall
      51	
-     52	       
 \end{verbatim}
 
 \subsection{実行結果}
 
+\begin{verbatim}
+      Enter number of disks>  4
+      Move disk 1 from peg 1 to peg 3.
+      Move disk 2 from peg 1 to peg 2.
+      Move disk 1 from peg 3 to peg 2.
+      Move disk 3 from peg 1 to peg 3.
+      Move disk 1 from peg 2 to peg 1.
+      Move disk 2 from peg 2 to peg 3.
+      Move disk 1 from peg 1 to peg 3.
+      Move disk 4 from peg 1 to peg 2.
+      Move disk 1 from peg 3 to peg 2.
+      Move disk 2 from peg 3 to peg 1.
+      Move disk 1 from peg 2 to peg 1.
+      Move disk 3 from peg 3 to peg 2.
+      Move disk 1 from peg 1 to peg 3.
+      Move disk 2 from peg 1 to peg 2.
+      Move disk 1 from peg 3 to peg 2.           
+\end{verbatim}
+
+\subsection{プログラムの解説}
+ここでは{\tt \_print\_int}部分での手続きを例に解説する．
+\begin{enumerate}
+      \item スタックの領域を$24$バイト確保し，戻りアドレスを格納しておく．戻りアドレスを退避させている理由としては，
+      {\tt syscall}内の手続きがOSに一任され，アセンブリのプログラムから分からないようになっているからである．
+      （つまり，OSが勝手に$\$ra$レジスタの値を壊している可能性を考慮している．）
+      \item $\$v0$レジスタに適切な番号（{\tt \_print\_int}の場合は$1$）を格納し，{\tt syscall}命令を発行する．
+      \item スタックに格納しておいた戻りアドレスを$\$ra$レジスタに再び格納し，呼び出し元に帰る．
+\end{enumerate}
+
+その他の手続きも$\$v0$レジスタの値を変更することで，同様の手順で実行することができる．（OSによって抽象化されている．）
+
+また，{\tt exit}手続きのみ，スタックに戻りアドレスを格納していない．
+その理由としては{\tt syscall}の発行によってプロセスが終了するので，
+値を退避させたところで復帰させる方法がないからである．
 
 \subsection{考察}
 
+今回のプログラムでは{\tt syscall}を呼び出す部分のみをアセンブリ言語で記述している．
+これは，C言語の中から直接{\tt syscall}命令を発行する方法が存在しないからである．
+そして，実行する時にC言語の部分をアセンブリ言語にコンパイルし，{\tt syscalls.s}と共に正しい順序でメモリ上に読み込むことで，
+プログラムを実行することができる．ここで，ファイル読み込みを間違えた場合は関数の参照先が未定義となり，プログラムが例外を発生する．
 
+また，手続き呼び出し規約によって「引数はどのレジスタに入っていて，戻り値はこのレジスタに入っている」というのが決められているので，
+この規約を守っている限りはC言語とアセンブリ言語との連携を円滑に行うことができる．
+言い換えれば，プログラマはコンパイラがどのようにC言語のプログラムを変換するのか（レジスタを決定するルール）を知っていなければアセンブリ言語を書くことができない，ということである．
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{課題2-2}
