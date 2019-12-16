@@ -1,10 +1,10 @@
 main()
 {
-    int primes_auto[10];
-    int i;
-    for (i = 0; i < 10; i++)
-    {
-        primes_auto[i] = i;
-        print_int(primes_auto[i]);
-    }
+    int primes_auto[2];
+
+    primes_auto[0] = 0;
+    primes_auto[1] = 1;
+
+    print_int(primes_auto[0]);
+    print_int(primes_auto[1]);
 }
