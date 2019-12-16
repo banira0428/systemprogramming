@@ -7,7 +7,7 @@
             left=25truemm, right=25truemm]{geometry}
 
 % ToDo: 提出要領に従って，適切なタイトル・サブタイトルを設定する
-\title{システムプログラミング1 \\
+\title{システムプログラミング2 \\
        期末レポート}
 
 % ToDo: 自分自身の氏名と学生番号に書き換える
@@ -15,9 +15,9 @@
         学生番号: 09430559}
 
 % ToDo: 教員の指示に従って適切に書き換える
-\date{出題日: 2019年10月7日 \\   %todo 正しい日付に置き換える
-      提出日: 2019年?月??日 \\
-      締切日: 2019年11月18日 \\}  % 注：最後の\\は不要に見えるが必要．
+\date{出題日: 2019年12月9日 \\   %todo 正しい日付に置き換える
+      提出日: 2019年??月??日 \\
+      締切日: 2020年1月27日 \\}  % 注：最後の\\は不要に見えるが必要．
 
 % ToDo: 図を入れる場合，以下の1行を有効にする
 %\usepackage{graphicx}
@@ -28,437 +28,443 @@
 % 目次つきの表紙ページにする場合はコメントを外す
 %{\footnotesize \tableofcontents \newpage}
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{概要}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-本演習では，C言語で書かれたプログラムを機械語に変換する際に必要不可欠となるアセンブラについて，
-いくつかの演習課題を解くことを通じて学びを深めた．具体的には，入出力機能の実装やアセンブリ言語内に登場する用語の解説，
-そして，C言語で記述されているプログラムの再現（関数の実装，素数を表示するプログラム及びその保存方法の改造），を行った．
-以下に，今回の授業内で実践した5つの演習課題についての詳しい内容を記述する．
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{課題1-1}
+\section{課題2-1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \subsection{課題内容}
-教科書A.8節 「入力と出力」に示されている方法と， 
-A.9節 最後「システムコール」に示されている方法のそれぞれで "Hello World" を表示せよ．
-両者の方式を比較し考察せよ．
+SPIMが提供するシステムコールを C言語から実行できるようにしたい． 教科書A.6節 「手続き呼出し規約」に従って，各種手続きをアセンブラで記述せよ． ファイル名は，{\tt syscalls.s} とすること．
 
-\subsection{作成したプログラム（システムコール無し）}
+また，記述した {\tt syscalls.s} の関数をC言語から呼び出すことで， ハノイの塔({\tt hanoi.c} とする)を完成させよ．
+
+\subsection{C言語で記述したプログラム例}
 
 \begin{verbatim}
-      1	        .data
-      2	        .align 2
-      3	msg:
-      4	        .asciiz "Hello World"
-      5	
-      6	        .text
-      7	        .align 2      
-      8	main:
-      9	        
-     10	        la      $a1, msg
-     11	        
-     12	        .text
-     13	        .align 2  
-     14	putc:
-     15	        lb      $a0, 0($a1)             
-     16	        lw      $t0, 0xffff0008         # $t0 = *(0xffff0008)
-     17	        li      $t1, 1                  # $t1 = 1
-     18	        and     $t0, $t0, $t1           # $t0 &= $t1
-     19	        beqz    $t0, putc               # if ($t0 == 0) goto putc
-     20	        sw      $a0, 0xffff000c         # *(0xffff000c) = $a0
-     21	        addi    $a1, $a1, 1
-     22	        bnez    $a0, putc
-     23	        j       $ra                     # return
- 
+      1	#include <stdio.h>
+      2	
+      3	void hanoi(int n, int start, int finish, int extra)
+      4	{
+      5	    if (n != 0)
+      6	    {
+      7	        hanoi(n - 1, start, extra, finish);
+      8	        print_string("Move disk ");
+      9	        print_int(n);
+     10	        print_string(" from peg ");
+     11	        print_int(start);
+     12	        print_string(" to peg ");
+     13	        print_int(finish);
+     14	        print_string(".\n");
+     15	        hanoi(n - 1, extra, finish, start);
+     16	    }
+     17	}
+     18	main()
+     19	{
+     20	    int n;
+     21	    print_string("Enter number of disks> ");
+     22	    n = read_int();
+     23	    hanoi(n, 1, 2, 3);
+     24	}     
+\end{verbatim}
+
+\subsection{作成したプログラム}
+\begin{verbatim}
+      1	.text
+      2	.align 2
+      3	
+      4	_print_int:
+      5	 subu    $sp,$sp,24
+      6	 sw      $ra,20($sp)
+      7	
+      8	 li      $v0, 1
+      9	 syscall
+     10	
+     11	 lw      $ra,20($sp)
+     12	 addu    $sp,$sp,24
+     13	 j       $ra 
+     14	
+     15	_print_string:
+     16	 subu    $sp,$sp,24
+     17	 sw      $ra,20($sp)
+     18	
+     19	 li      $v0, 4
+     20	 syscall
+     21	
+     22	 lw      $ra,20($sp)
+     23	 addu    $sp,$sp,24
+     24	 j       $ra 
+     25	
+     26	_read_int:
+     27	 subu    $sp,$sp,24
+     28	 sw      $ra,20($sp)
+     29	
+     30	 li      $v0, 5
+     31	 syscall
+     32	
+     33	 lw      $ra,20($sp)
+     34	 addu    $sp,$sp,24
+     35	 j       $ra 
+     36	
+     37	_read_string:
+     38	 subu    $sp,$sp,24
+     39	 sw      $ra,20($sp)
+     40	
+     41	 li      $v0, 8
+     42	 syscall
+     43	
+     44	 lw      $ra,20($sp)
+     45	 addu    $sp,$sp,24
+     46	 j       $ra
+     47	
+     48	_exit:
+     49	 li      $v0, 10
+     50	 syscall
+     51	
+\end{verbatim}
+
+\subsection{実行結果}
+
+\begin{verbatim}
+      Enter number of disks>  4
+      Move disk 1 from peg 1 to peg 3.
+      Move disk 2 from peg 1 to peg 2.
+      Move disk 1 from peg 3 to peg 2.
+      Move disk 3 from peg 1 to peg 3.
+      Move disk 1 from peg 2 to peg 1.
+      Move disk 2 from peg 2 to peg 3.
+      Move disk 1 from peg 1 to peg 3.
+      Move disk 4 from peg 1 to peg 2.
+      Move disk 1 from peg 3 to peg 2.
+      Move disk 2 from peg 3 to peg 1.
+      Move disk 1 from peg 2 to peg 1.
+      Move disk 3 from peg 3 to peg 2.
+      Move disk 1 from peg 1 to peg 3.
+      Move disk 2 from peg 1 to peg 2.
+      Move disk 1 from peg 3 to peg 2.           
 \end{verbatim}
 
 \subsection{プログラムの解説}
-1-4行目では，出力する文字列をあらかじめメモリ上に展開している．
+ここでは{\tt \_print\_int}部分での手続きを例に解説する．
+\begin{enumerate}
+      \item スタックの領域を$24$バイト確保し，戻りアドレスを格納しておく．戻りアドレスを退避させている理由としては，
+      {\tt syscall}内の手続きがOSに一任され，アセンブリのプログラムから分からないようになっているからである．
+      （つまり，OSが勝手に$\$ra$レジスタの値を壊している可能性を考慮している．）
+      \item $\$v0$レジスタに適切な番号（{\tt \_print\_int}の場合は$1$）を格納し，{\tt syscall}命令を発行する．
+      \item スタックに格納しておいた戻りアドレスを$\$ra$レジスタに再び格納し，呼び出し元に帰る．
+\end{enumerate}
 
-10行目では，先ほどメモリ上に展開した文字列の先頭アドレスをレジスタ$\$a1$に読み込む．
+その他の手続きも$\$v0$レジスタの値を変更することで，同様の手順で実行することができる．（OSによって抽象化されている．）
 
-15行目では，$\$a0$に，次に表示する文字のアドレスとして$\$a1$の値を格納する．
-
-16-18行目では入出力機器の状態を取得し，入出力が可能かどうかを判定している．（最下位ビットの値とのAND演算を行う）
-
-19行目では，入出力機器が使用可能な状態でない場合に，$putc$ラベルまで戻る様にしている．（入出力可能になるまで何度も判定を行っている）
-
-20行目では，入出力機器の出力用のアドレスを指定し$\$a0$の値を出力する．
-
-21-23行目では，$\$a1$の持つアドレスを一つずらし，次の文字のアドレスを格納した後，
-$\$a0$の値が$0$でなければ（$.asciiz$を使っているので，文字列の末尾のアドレス内には$0$が格納されている）$putc$ラベルに戻る．
-
-\subsection{作成したプログラム（システムコール有り）}
-
-\begin{verbatim}
-      1          .data
-      2          .align 2
-      3  msg:
-      4          .asciiz "Hello World"
-      5
-      6          .text
-      7          .align 2
-      8  main:
-      9          la      $a0, msg
-     10          li      $v0, 4
-     11          syscall
-     12          j       $ra
-     13          
-\end{verbatim}
-
-\subsection{プログラムの解説}
-1-8行目についてはシステムコール無しの場合と違いはないので，説明を省略する．
-
-9-10行目ではシステムコールを呼び出すための下準備を行っている．
-具体的には，システムコールに与える引数である$\$a0$に文字列の先頭アドレスを与え，
-どのシステムコールを呼ぶかを制御するレジスタ$\$v0$に，「文字列を出力する」ことを意味する$4$を格納する
-
-11行目では実際にシステムコールを呼び出し，先ほど設定した$\$a0$と$\$v0$の値を見て，「$\$a0$を先頭アドレスとした文字列を出力する」
-という動作をOSが行う．
-
-この時，入出力機器へのアクセスは全てOSを介して行っているので，プログラム側から直接入出力機器にアクセスすることはない．
+また，{\tt exit}手続きのみ，スタックに戻りアドレスを格納していない．
+その理由としては{\tt syscall}の発行によってプロセスが終了するので，
+値を退避させたところで復帰させる方法がないからである．
+ただ，手続き呼び出しを厳密に守る場合はスタックへの退避の手続きを記述する場合もある．その場合でも実行結果は変わらない．
 
 \subsection{考察}
 
-両者を比較した時に，システムコールを利用しないプログラムでは，入出力処理を行う際にアドレスを固定値で指定しているのに対し，
-システムコールを利用するプログラムでは，入出力処理はシステムコールによりOS側に一任されているので
-プログラム内で固定値のアドレスが指定されていない，という違いがある．
-この違いによって，システムコールを利用する方のプログラムは入出力装置についての情報を持っていなくても動作するので，
-入出力機器が変更されてもプログラムを（疎結合になっている）という利点がある．
-その他にも，OS側が許可した動作しかできないようになっているので（各種機器とプロセッサ間を仲介し，互いが直接アクセスしないようにしている），
-アドレスを直接指定するよりもセキュリティ上のリスクを減らすことができる．
+今回のプログラムでは{\tt syscall}を呼び出す部分のみをアセンブリ言語で記述している．
+これは，C言語の中から直接{\tt syscall}命令を発行する方法が存在しないからである．
+そして，実行する時にC言語の部分をアセンブリ言語にコンパイルし，{\tt syscalls.s}と共に正しい順序でメモリ上に読み込むことで，
+プログラムを実行することができる．ここで，ファイル読み込みを間違えた場合は関数の参照先が未定義となり，プログラムが例外を発生する．
+
+また，手続き呼び出し規約によって「引数はどのレジスタに入っていて，戻り値はこのレジスタに入っている」というのが決められているので，
+この規約を守っている限りはC言語とアセンブリ言語との連携を円滑に行うことができる．
+言い換えれば，プログラマはコンパイラがどのようにC言語のプログラムを変換するのか（レジスタを決定するルール）を知っていなければアセンブリ言語を書くことができない，ということである．
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{課題1-2}
+\section{課題2-2}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \subsection{課題内容}
-アセンブリ言語中で使用する .data， .text および .align とは何か解説せよ．
- 下記コード中の 6行目の .data がない場合，どうなるかについて考察せよ．
+{\tt hanoi.s} を例に {\tt spim-gcc} の引数保存に関するスタックの利用方法について，説明せよ． 
+そのことは，規約上許されるスタックフレームの最小値$24$とどう関係しているか． 
+このスタックフレームの最小値規約を守らないとどのような問題が生じるかについて解説せよ．
 
+\subsection{与えられたプログラム}
 \begin{verbatim}
-       1:         .text
-       2:         .align  2
-       3: _print_message:
-       4:         la      $a0, msg
-       5:         li      $v0, 4
-       6:         .data
-       7:         .align  2
-       8: msg:
-       9:         .asciiz "Hello!!\n"
-      10:         .text
-      11:         syscall
-      12:         j       $ra
-      13: main:
-      14:         subu    $sp, $sp, 24
-      15:         sw      $ra, 16($sp)
-      16:         jal     _print_message
-      17:         lw      $ra, 16($sp)
-      18:         addu    $sp, $sp, 24
-      19:         j       $ra
+      1	      .file	1 "hanoi.c"
+      2	
+            （中略）
+     13	
+     14	
+     15	     .rdata
+     16	     .align	0
+     17	     .align	2
+     18	$LC0:
+     19	     .ascii	"Move disk \000"
+     20	     .align	2
+     21	$LC1:
+     22	     .ascii	" from peg \000"
+     23	     .align	2
+     24	$LC2:
+     25	     .ascii	" to peg \000"
+     26	     .align	2
+     27	$LC3:
+     28	     .ascii	".\n\000"
+     29	     .text
+     30	     .align	2
+     31	     .set	nomips16
+     32	_hanoi:
+     33	     subu	$sp,$sp,24
+     34	     sw	$ra,20($sp)
+     35	     sw	$fp,16($sp)
+     36	     move	$fp,$sp
+     37	     sw	$a0,24($fp)
+     38	     sw	$a1,28($fp)
+     39	     sw	$a2,32($fp)
+     40	     sw	$a3,36($fp)
+     41	     lw	$v0,24($fp)
+     42	     beq	$v0,$zero,$L3
+     43	     lw	$v0,24($fp)
+     44	     addu	$v0,$v0,-1
+     45	     move	$a0,$v0
+     46	     lw	$a1,28($fp)
+     47	     lw	$a2,36($fp)
+     48	     lw	$a3,32($fp)
+     49	     jal	_hanoi
+     50	     la	$a0,$LC0
+     51	     jal	_print_string
+     52	     lw	$a0,24($fp)
+     53	     jal	_print_int
+     54	     la	$a0,$LC1
+     55	     jal	_print_string
+     56	     lw	$a0,28($fp)
+     57	     jal	_print_int
+     58	     la	$a0,$LC2
+     59	     jal	_print_string
+     60	     lw	$a0,32($fp)
+     61	     jal	_print_int
+     62	     la	$a0,$LC3
+     63	     jal	_print_string
+     64	     lw	$v0,24($fp)
+     65	     addu	$v0,$v0,-1
+     66	     move	$a0,$v0
+     67	     lw	$a1,36($fp)
+     68	     lw	$a2,32($fp)
+     69	     lw	$a3,28($fp)
+     70	     jal	_hanoi
+     71	$L3:
+     72	     move	$sp,$fp
+     73	     lw	$ra,20($sp)
+     74	     lw	$fp,16($sp)
+     75	     addu	$sp,$sp,24
+     76	     j	$ra
+     77	     .rdata
+     78	     .align	0
+     79	     .align	2
+     80	$LC4:
+     81	     .ascii	"Enter number of disks> \000"
+     82	     .text
+     83	     .align	2
+     84	     .set	nomips16
+     85	main:
+     86	     subu	$sp,$sp,32
+     87	     sw	$ra,28($sp)
+     88	     sw	$fp,24($sp)
+     89	     move	$fp,$sp
+     90	     la	$a0,$LC4
+     91	     jal	_print_string
+     92	     jal	_read_int
+     93	     sw	$v0,16($fp)
+     94	     lw	$a0,16($fp)
+     95	     li	$a1,1			# 0x1
+     96	     li	$a2,2			# 0x2
+     97	     li	$a3,3			# 0x3
+     98	     jal	_hanoi
+     99	     move	$sp,$fp
+    100	     lw	$ra,28($sp)
+    101	     lw	$fp,24($sp)
+    102	     addu	$sp,$sp,32
+    103	     j	$ra
 \end{verbatim}
 
-\subsection{解答}
+\subsection{解説}
 
-.data，.text および .align とは「アセンブラ指令」と呼ばれるもので，主にプログラムの実行前に行われる
-前処理を制御するものである．つまり，これらの記述は機械語としてメモリに変換される訳ではない．
-その中でも，.data と .text はメモリ中のどこに機械語を配置するかを制御している．
-具体的には .data はデータをデータセグメントに配置することを指示し，.text はデータをテキストセグメントに配置することを指示している．
-何故，データセグメントとテキストセグメントを区別する必要があるのかというと，データセグメントの内容には読み込みと書き込みが両方行われるのに対し，
-テキストセグメントの内容は読み込みしか行われない（値が不変）ので，同一プログラムを他のプロセスで実行する時にテキスト部分を共有することができたり，
-読み込み専用領域にデータを置くことができる，というメリットがあるからである．
-
-また .align はオプションとして整数$n$を指定し，データが$2^{n}$ずつの領域に確保される様に余白を取るための命令である．
-何故余白を取る必要があるのかというと，MIPSは32ビット（4バイト）ずつデータをCPUとやり取りするため，余白を取って（この場合は$n = 2$）データを綺麗に整列させておくことで，
-アクセス回数を減らすことが可能となり，システムの効率化に繋がるからである．
-
-最後に，上記のコード中の6行目の .data がない場合にどうなるかというと，？？？？？？？？？
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{課題1-3}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{課題内容}
-教科書A.6節 「手続き呼出し規約」に従って，関数 fact を実装せよ．
-(以降の課題においては，この規約に全て従うこと) fact をC言語で記述した場合は，以下のようになるであろう．
-\begin{verbatim}
-      1: main()
-      2: {
-      3:   print_string("The factorial of 10 is ");
-      4:   print_int(fact(10));
-      5:   print_string("\n");
-      6: }
-      7: 
-      8: int fact(int n)
-      9: {
-     10:   if (n < 1)
-     11:     return 1;
-     12:   else
-     13:     return n * fact(n - 1);
-     14: }
-\end{verbatim}
-
-\subsection{作成したプログラム}
-\begin{verbatim}
-      1	        .data
-      2	        .align 2
-      3	msg:
-      4	        .asciiz "The factorial of 10 is "
-      5	newline:
-      6	        .asciiz "\n"
-      7	
-      8	        .text
-      9	        .align 2
-     10	main:
-     11	        move    $s0, $ra
-     12	        li      $s1, 1
-     13	        la      $a0, msg
-     14	        jal     print_string
-     15	        li      $a0, 10
-     16	        jal     fact
-     17	        move    $a0, $v0
-     18	        jal     print_int
-     19	        la      $a0, newline
-     20	        jal     print_string
-     21	        j       $s0
-     22	
-     23	fact:
-     24	        subu  $sp, $sp, 32
-     25	        sw    $fp, 16($sp)
-     26	        sw    $ra, 20($sp)
-     27	
-     28	        addu  $fp, $sp, 28
-     29	        sw    $a0, 0($fp)
-     30	
-     31	        bgtz  $a0, Lthen
-     32	        j     Lelse 
-     33	
-     34	Lthen:
-     35	        subu  $a0, $a0, 1
-     36	        jal   fact
-     37	
-     38	        lw    $v1, 0($fp)   
-     39	        mul   $v0, $v0, $v1
-     40	        j     Lreturn
-     41	        
-     42	Lelse:
-     43	        li    $v0, 1
-     44	        j     Lreturn
-     45	
-     46	Lreturn:
-     47	        lw    $fp, 16($sp)
-     48	        lw    $ra, 20($sp) 
-     49	        addiu $sp, $sp, 32
-     50	        j     $ra
-     51	
-     52	print_string:
-     53	        li      $v0, 4
-     54	        syscall
-     55	        j       $ra
-     56	
-     57	print_int:
-     58	        li      $v0, 1
-     59	        syscall
-     60	        j       $ra
-     61	         
-\end{verbatim}
-
-\subsection{プログラムの解説}
-ここでは$fact$関数内で行われている処理に対応している部分について，処理の流れを追いながら詳細に解説する．
-
+{\tt spim-gcc}の引数保存について，表\ref{tbl:2-2}に示す．
+具体的な保存手順について説明すると，以下のようになる．
 \begin{enumerate}
-      \item \label{push_start} $\$sp$の値を減算し，スタックを32バイト分確保した後，そこに$\$fp$と$\$ra$，$\$a0$の値を退避させる．（24-29行目）
-      \item $\$a0$の値を確認し，その値が$0$かどうかで処理を分岐する．（31-32行目）
-      \item \label{push_b}$\$a0$の値が$0$より大きいので，$Lthen$ラベルの場所にジャンプする．
-      \item \label{push_end}$\$a0$の値を一つ減らし，その後$fact$を再帰的に呼び出す（35-36行目）
-      \item \ref{push_start} から \ref{push_end} までの処理を$\$a0$の値が$0$になるまで繰り返す．
-      \item $\$a0$の値が$0$になった時，\ref{push_b}のタイミングで$Lthen$ラベルでは無く$Lelse$ラベルの場所にジャンプする．
-      \item $\$v0$に$1$を格納した後，$Lreturn$ラベルの場所にジャンプする．（43-44行目）
-      \item \label{pop_start}直近にスタックに退避させた値（32バイト分）をレジスタに復帰させた後，$\$sp$の値を加算し，使用済みスタック領域の解放を行う．（47-49行目）
-      \item $\$ra$レジスタに格納されている，\ref{push_end}の$fact$にジャンプする命令の次の命令のアドレスに移動する，（50行目）
-      \item スタックに退避しておいた$\$a0$の値を$\$v1$に格納し，$\$v0$の値を自身と$\$v1$の積の値に上書きする．（38-39行目）
-      \item \label{pop_end}$Lreturn$ラベルの場所にジャンプする．（40行目）
-      \item \ref{pop_start}から\ref{pop_end}までの処理を繰り返す．
-      \item 一番最初にスタックに退避させた$\$ra$には一番最初に$fact$を呼び出した時の次の命令のアドレスが格納されているので，
-      このプログラムで確保したスタック領域を解放しきるのと同時に$fact$の一連の処理が終了する，（計算結果は$\$v0$に格納されている）．
+      \item \label{itm:main}スタックを32バイト確保し，$\$fp$,$\$ra$ レジスタの値を退避させる．（82-85行目）
+      \item \label{itm:hanoi_begin}{\tt hanoi}ラベルにジャンプした後，スタックをさらに24バイト確保し，$\$fp$,$\$ra$ レジスタの値を退避させる．（31-33行目）
+      \item \label{itm:hanoi_end}\ref{itm:main}で確保したスタックの空き領域に，（$\$a0-\$a3$）を退避させる．（呼び出された側で退避の判断を行うことで，余計な書き込み処理を減らすことが可能となる）（35-38行目）
+      \item {\tt hanoi}ラベルに再帰的にジャンプするので，必要な回数だけ\ref{itm:hanoi_begin}-\ref{itm:hanoi_end}間の処理を繰り返す．
 \end{enumerate}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{課題1-4}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{課題内容}
-素数を最初から100番目まで求めて表示するMIPSのアセンブリ言語プログラムを作成してテストせよ． 
-その際，素数を求めるために下記の2つのルーチンを作成すること．
+\begin{table}[t]
+      \centering
+      \caption{スタックを用いた引数保存}
+      \label{tbl:2-2}
+      \begin{tabular}{|l|l|l|l|l|}
+      \hline
+      \$sp       & offset & 内容   & 備考       & 行番号（格納処理の場所） \\ \hline
+：          & ：      & ：    & ：        & ：            \\ \hline
+31行目での\$sp & -56    & \$a0 & 第1引数     & 35行目（2回目）    \\ \hline
+           & -52    & \$a1 & 第2引数     & 36行目（2回目）    \\ \hline
+           & -48    & \$a2 & 第3引数     & 37行目（2回目）    \\ \hline
+           & -44    & \$a3 & 第4引数     & 38行目（2回目）    \\ \hline
+           & -40    & \$fp & フレームポインタ & 33行目         \\ \hline
+           & -36    & \$ra & 戻りアドレス   & 32行目         \\ \hline
+82行目での\$sp & -32    & \$a0 & 第1引数     & 35行目         \\ \hline
+           & -28    & \$a1 & 第2引数     & 36行目         \\ \hline
+           & -24    & \$a2 & 第3引数     & 37行目         \\ \hline
+           & -20    & \$a3 & 第4引数     & 38行目         \\ \hline
+           & -16    & \$v0 & 戻り値      & 89行目         \\ \hline
+           & -12    &      &          &              \\ \hline
+           & -8     & \$fp & フレームポインタ & 84行目         \\ \hline
+           & -4     & \$ra & 戻りアドレス   & 83行目         \\ \hline
+      \end{tabular}
+      \end{table}
 
+
+
+
+また，規約上許されてるスタックフレームの最小値が$24$となっているのは，被呼び出し関数が退避させる可能性のある
+4つの引数レジスタ（$\$a0-\$a3$），呼び出し関数の戻りアドレス（$\$ra$），そして呼び出し関数のフレームポインタ（$\$fp$）
+のための領域を確保する必要があるからである（レジスタ6個分）．
+
+このスタックフレームの最小値について，守らない場合どうなるかについて以下に解説する．
 \begin{itemize}
-      \item test\_prime(n)    nが素数なら1，そうでなければ0を返す
-      \item main()       整数を順々に素数判定し，100個プリント
+      \item 呼び出された側が守らない場合：自身が確保した領域内に引数レジスタ（$\$a0-\$a3$）を退避するので，不具合は発生しない．
+      （呼び出し側が無駄な空き領域を確保しただけで済む）
+      \item 呼び出した側が守らない場合：呼び出された側は，呼び出し側が引数レジスタ（$\$a0-\$a3$）
+      を保存するためのスタック領域を確保してくれている前提で引数レジスタ（$\$a0-\$a3$）を退避させようとするので，
+      呼び出し側がスタックに格納している値を破壊してしまい，不具合が発生する．
 \end{itemize}
 
-\subsubsection{C言語で記述したプログラム例}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{課題2-3}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{課題内容}
+以下のプログラム {\tt report2-1.c} をコンパイルした結果をもとに， {\tt auto}変数と{\tt static}変数の違い，ポインタと配列の違いについてレポートせよ．
 
+\subsection{与えられたプログラム}
 \begin{verbatim}
-      1: int test_prime(int n)
-      2: {
-      3:   int i;
-      4:   for (i = 2; i < n; i++){
-      5:     if (n % i == 0)
-      6:       return 0;
-      7:   }
-      8:   return 1;
-      9: }
-     10: 
-     11: int main()
-     12: {
-     13:   int match = 0, n = 2;
-     14:   while (match < 100){
-     15:     if (test_prime(n) == 1){
-     16:       print_int(n);
-     17:       print_string(" ");
-     18:       match++;
-     19:     }
-     20:     n++;
-     21:   }
-     22:   print_string("\n");
-     23: }
-\end{verbatim}
-
-\subsection{作成したプログラム}
-
-\begin{verbatim}
-      1	    .data
-      2	    .align  2
-      3	
-      4	newline:
-      5	        .asciiz "\n"
-      6	space:
-      7	        .asciiz " "
-      8	
-      9		.text
-     10		.align	2
-     11	
-     12	test_prime:				    # int test_prime(int n = $a0)
+      1	int primes_stat[10];
+      2	
+      3	char *string_ptr = "ABCDEFG";
+      4	char string_ary[] = "ABCDEFG";
+      5	
+      6	void print_var(char *name, int val)
+      7	{
+      8	    print_string(name);
+      9	    print_string(" = ");
+     10	    print_int(val);
+     11	    print_string("\n");
+     12	}
      13	
-     14		li	$a3,2			    # forのループ数カウンタ
-     15	
-     16	for:
-     17	    slt	$v0,$a3,$a1	        # if !(i < n)
-     18		beq	$v0,$zero,return1	#   return 1
-     19	
-     20	    div	$a1,$a3			    # $a0 = 
-     21		mfhi	$v0			    # $v0 = n % i
-     22		beq	$v0,$zero,return0	# if ($v0 == 0) return 0
-     23	
-     24	    addi	$a3, $a3, 1		# $a1 = $a1 + 0
-     25	    j   for
-     26	
-     27	while:
-     28		slt	$v0,$a2,$a0		    # if !(i < n)
-     29		beq	$v0,$zero,return1	#   return 1
-     30	
-     31	    jal test_prime
-     32	    beq $v0,$s1,match
-     33	
-     34	    addi	$a1, $a1, 1		# $a1 = $a1 + 1
-     35		j	while			    # goto while
-     36	
-     37	match: 
-     38	    move    $s2, $a0
-     39	    move    $a0, $a1
-     40	    jal     print_int
-     41	    la      $a0, space
-     42	    jal     print_string
-     43	    move    $a0, $s2
-     44	
-     45	    addi	$a1, $a1, 1			# $a1 = $a1 + 0
-     46	    addi	$a2, $a2, 1			# $a1 = $a1 + 0
-     47	    j       while
-     48	
-     49	main:
-     50	    move    $s0, $ra
-     51	    li      $s1, 1
-     52	    la		$a0, 100 
-     53	    li      $a1, 2      # whileのループ数カウンタ
-     54	    li      $a2, 0      # match数
-     55	    jal     while
-     56	    la      $a0, newline
-     57	    jal     print_string
-     58	    j	$s0				# jump to $s0
-     59	
-     60	
-     61	return0:
-     62		li	$v0,0
-     63		j	$ra
-     64	
-     65	return1:
-     66		li	$v0,1
-     67		j	$ra
-     68	
-     69	print_string:
-     70	    li      $v0, 4
-     71	    syscall
-     72	    j       $ra
-     73	
-     74	print_int:
-     75	    li      $v0, 1
-     76	    syscall
-     77	    j       $ra 
+     14	main()
+     15	{
+     16	    int primes_auto[10];
+     17	
+     18	    primes_stat[0] = 2;
+     19	    primes_auto[0] = 3;
+     20	
+     21	    print_var("primes_stat[0]", primes_stat[0]);
+     22	    print_var("primes_auto[0]", primes_auto[0]);
+     23	}
 \end{verbatim}
 
-\subsection{プログラムの解説}
+\subsection{与えられたプログラム（コンパイル後）}
+\begin{verbatim}
+      1		.file	1 "2-3.c"
+      2	
+            （中略）
+     13	
+     14	
+     15		.rdata
+     16		.align	0
+     17		.align	2
+     18	$LC0:
+     19		.ascii	"ABCDEFG\000"
+     20		.data
+     21		.align	0
+     22		.align	2
+     23	_string_ptr:
+     24		.word	$LC0
+     25		.align	2
+     26	_string_ary:
+     27		.ascii	"ABCDEFG\000"
+     28		.rdata
+     29		.align	0
+     30		.align	2
+     31	$LC1:
+     32		.ascii	" = \000"
+     33		.align	2
+     34	$LC2:
+     35		.ascii	"\n\000"
+     36		.text
+     37		.align	2
+     38		.set	nomips16
+     39	_print_var:
+     40		subu	$sp,$sp,24
+     41		sw	$ra,20($sp)
+     42		sw	$fp,16($sp)
+     43		move	$fp,$sp
+     44		sw	$a0,24($fp)
+     45		sw	$a1,28($fp)
+     46		lw	$a0,24($fp)
+     47		jal	_print_string
+     48		la	$a0,$LC1
+     49		jal	_print_string
+     50		lw	$a0,28($fp)
+     51		jal	_print_int
+     52		la	$a0,$LC2
+     53		jal	_print_string
+     54		move	$sp,$fp
+     55		lw	$ra,20($sp)
+     56		lw	$fp,16($sp)
+     57		addu	$sp,$sp,24
+     58		j	$ra
+     59		.rdata
+     60		.align	0
+     61		.align	2
+     62	$LC3:
+     63		.ascii	"primes_stat[0]\000"
+     64		.align	2
+     65	$LC4:
+     66		.ascii	"primes_auto[0]\000"
+     67		.text
+     68		.align	2
+     69		.set	nomips16
+     70	main:
+     71		subu	$sp,$sp,64
+     72		sw	$ra,60($sp)
+     73		sw	$fp,56($sp)
+     74		move	$fp,$sp
+     75		li	$v0,2			# 0x2
+     76		sw	$v0,_primes_stat
+     77		li	$v0,3			# 0x3
+     78		sw	$v0,16($fp)
+     79		la	$a0,$LC3
+     80		lw	$a1,_primes_stat
+     81		jal	_print_var
+     82		la	$a0,$LC4
+     83		lw	$a1,16($fp)
+     84		jal	_print_var
+     85		move	$sp,$fp
+     86		lw	$ra,60($sp)
+     87		lw	$fp,56($sp)
+     88		addu	$sp,$sp,64
+     89		j	$ra
+     90	
+     91		.comm	_primes_stat,40
+\end{verbatim}
+
+\subsection{考察}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{課題1-5}
+\section{課題2-4}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{課題内容}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{課題2-5}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{課題内容}
-
-素数を最初から100番目まで求めて表示するMIPSのアセンブリ言語プログラムを作成してテストせよ． 
-ただし，配列に実行結果を保存するように main 部分を改造し， 
-ユーザの入力によって任意の番目の配列要素を表示可能にせよ．
-
-\subsubsection{C言語で記述したプログラム例}
-
-\begin{verbatim}
-      1: int primes[100];
-      2: int main()
-      3: {
-      4:   int match = 0, n = 2;
-      5:   while (match < 100){
-      6:     if (test_prime(n) == 1){
-      7:       primes[match++] = n;
-      8:     }
-      9:     n++;
-     10:   }
-     11:   for (;;){
-     12:     print_string("> ");
-     13:     print_int(primes[read_int() - 1]);
-     14:     print_string("\n");
-     15:   }
-     16: }
-\end{verbatim}
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{感想}
-ラベル名をわかりやすくしよう，多少冗長になってもジャンプ先を記録しておきたい，高級言語のありがたみarigatami
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%--------------------------------------------------------------%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{作成したプログラム}\label{sec:sourcecode}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-{\fontsize{10pt}{11pt} \selectfont
-\begin{verbatim}
-\end{verbatim}
-}
 
 \end{document}

@@ -281,28 +281,184 @@ SPIMが提供するシステムコールを C言語から実行できるよう�
 
 \subsection{解説}
 
-{\tt spim-gcc}の引数保存について
+{\tt spim-gcc}の引数保存について，表\ref{tbl:2-2}に示す．
+具体的な保存手順について説明すると，以下のようになる．
+\begin{enumerate}
+      \item \label{itm:main}スタックを32バイト確保し，$\$fp$,$\$ra$ レジスタの値を退避させる．（82-85行目）
+      \item \label{itm:hanoi_begin}{\tt hanoi}ラベルにジャンプした後，スタックをさらに24バイト確保し，$\$fp$,$\$ra$ レジスタの値を退避させる．（31-33行目）
+      \item \label{itm:hanoi_end}\ref{itm:main}で確保したスタックの空き領域に，（$\$a0-\$a3$）を退避させる．（呼び出された側で退避の判断を行うことで，余計な書き込み処理を減らすことが可能となる）（35-38行目）
+      \item {\tt hanoi}ラベルに再帰的にジャンプするので，必要な回数だけ\ref{itm:hanoi_begin}-\ref{itm:hanoi_end}間の処理を繰り返す．
+\end{enumerate}
+
+\begin{table}[t]
+      \centering
+      \caption{スタックを用いた引数保存}
+      \label{tbl:2-2}
+      \begin{tabular}{|l|l|l|l|l|}
+      \hline
+      \$sp       & offset & 内容   & 備考       & 行番号（格納処理の場所） \\ \hline
+：          & ：      & ：    & ：        & ：            \\ \hline
+31行目での\$sp & -56    & \$a0 & 第1引数     & 35行目（2回目）    \\ \hline
+           & -52    & \$a1 & 第2引数     & 36行目（2回目）    \\ \hline
+           & -48    & \$a2 & 第3引数     & 37行目（2回目）    \\ \hline
+           & -44    & \$a3 & 第4引数     & 38行目（2回目）    \\ \hline
+           & -40    & \$fp & フレームポインタ & 33行目         \\ \hline
+           & -36    & \$ra & 戻りアドレス   & 32行目         \\ \hline
+82行目での\$sp & -32    & \$a0 & 第1引数     & 35行目         \\ \hline
+           & -28    & \$a1 & 第2引数     & 36行目         \\ \hline
+           & -24    & \$a2 & 第3引数     & 37行目         \\ \hline
+           & -20    & \$a3 & 第4引数     & 38行目         \\ \hline
+           & -16    & \$v0 & 戻り値      & 89行目         \\ \hline
+           & -12    &      &          &              \\ \hline
+           & -8     & \$fp & フレームポインタ & 84行目         \\ \hline
+           & -4     & \$ra & 戻りアドレス   & 83行目         \\ \hline
+      \end{tabular}
+      \end{table}
 
 
-規約上許されてるスタックフレームの最小値が$24$となっているのは，被呼び出し関数が退避させる可能性のある
+
+
+また，規約上許されてるスタックフレームの最小値が$24$となっているのは，被呼び出し関数が退避させる可能性のある
 4つの引数レジスタ（$\$a0-\$a3$），呼び出し関数の戻りアドレス（$\$ra$），そして呼び出し関数のフレームポインタ（$\$fp$）
 のための領域を確保する必要があるからである（レジスタ6個分）．
 
-このスタックフレームの最小値について，守らない場合にどうなるかについて以下に解説する．
+このスタックフレームの最小値について，守らない場合どうなるかについて以下に解説する．
 \begin{itemize}
-      \item 呼び出された側が守らない場合：自身が確保した領域内に引数レジスタ（$\$a0-\$a3$）を保存するので，不具合は発生しない．
-      （呼び出し側が無駄な空き領域を確保しただけ）
+      \item 呼び出された側が守らない場合：自身が確保した領域内に引数レジスタ（$\$a0-\$a3$）を退避するので，不具合は発生しない．
+      （呼び出し側が無駄な空き領域を確保しただけで済む）
       \item 呼び出した側が守らない場合：呼び出された側は，呼び出し側が引数レジスタ（$\$a0-\$a3$）
       を保存するためのスタック領域を確保してくれている前提で引数レジスタ（$\$a0-\$a3$）を退避させようとするので，
-      呼び出し側がスタックに確保している値を破壊してしまい，不具合が発生する．
+      呼び出し側がスタックに格納している値を破壊してしまい，不具合が発生する．
 \end{itemize}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{課題2-3}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \subsection{課題内容}
+以下のプログラム {\tt report2-1.c} をコンパイルした結果をもとに， {\tt auto}変数と{\tt static}変数の違い，ポインタと配列の違いについてレポートせよ．
+
+\subsection{与えられたプログラム}
+\begin{verbatim}
+      1	int primes_stat[10];
+      2	
+      3	char *string_ptr = "ABCDEFG";
+      4	char string_ary[] = "ABCDEFG";
+      5	
+      6	void print_var(char *name, int val)
+      7	{
+      8	    print_string(name);
+      9	    print_string(" = ");
+     10	    print_int(val);
+     11	    print_string("\n");
+     12	}
+     13	
+     14	main()
+     15	{
+     16	    int primes_auto[10];
+     17	
+     18	    primes_stat[0] = 2;
+     19	    primes_auto[0] = 3;
+     20	
+     21	    print_var("primes_stat[0]", primes_stat[0]);
+     22	    print_var("primes_auto[0]", primes_auto[0]);
+     23	}
+\end{verbatim}
+
+\subsection{与えられたプログラム（コンパイル後）}
+\begin{verbatim}
+      1	    .file	1 "2-3.c"
+      2	
+            （中略）
+     13	
+     14	
+     15	    .rdata
+     16	    .align	0
+     17	    .align	2
+     18	$LC0:
+     19	    .ascii	"ABCDEFG\000"
+     20	    .data
+     21	    .align	0
+     22	    .align	2
+     23	_string_ptr:
+     24	    .word	$LC0
+     25	    .align	2
+     26	_string_ary:
+     27	    .ascii	"ABCDEFG\000"
+     28	    .rdata
+     29	    .align	0
+     30	    .align	2
+     31	$LC1:
+     32	    .ascii	" = \000"
+     33	    .align	2
+     34	$LC2:
+     35	    .ascii	"\n\000"
+     36	    .text
+     37	    .align	2
+     38	    .set	nomips16
+     39	_print_var:
+     40	    subu	$sp,$sp,24
+     41	    sw	$ra,20($sp)
+     42	    sw	$fp,16($sp)
+     43	    move	$fp,$sp
+     44	    sw	$a0,24($fp)
+     45	    sw	$a1,28($fp)
+     46	    lw	$a0,24($fp)
+     47	    jal	_print_string
+     48	    la	$a0,$LC1
+     49	    jal	_print_string
+     50	    lw	$a0,28($fp)
+     51	    jal	_print_int
+     52	    la	$a0,$LC2
+     53	    jal	_print_string
+     54	    move	$sp,$fp
+     55	    lw	$ra,20($sp)
+     56	    lw	$fp,16($sp)
+     57	    addu	$sp,$sp,24
+     58	    j	$ra
+     59	    .rdata
+     60	    .align	0
+     61	    .align	2
+     62	$LC3:
+     63	    .ascii	"primes_stat[0]\000"
+     64	    .align	2
+     65	$LC4:
+     66	    .ascii	"primes_auto[0]\000"
+     67	    .text
+     68	    .align	2
+     69	    .set	nomips16
+     70	main:
+     71	    subu	$sp,$sp,64
+     72	    sw	$ra,60($sp)
+     73	    sw	$fp,56($sp)
+     74	    move	$fp,$sp
+     75	    li	$v0,2			# 0x2
+     76	    sw	$v0,_primes_stat
+     77	    li	$v0,3			# 0x3
+     78	    sw	$v0,16($fp)
+     79	    la	$a0,$LC3
+     80	    lw	$a1,_primes_stat
+     81	    jal	_print_var
+     82	    la	$a0,$LC4
+     83	    lw	$a1,16($fp)
+     84	    jal	_print_var
+     85	    move	$sp,$fp
+     86	    lw	$ra,60($sp)
+     87	    lw	$fp,56($sp)
+     88	    addu	$sp,$sp,64
+     89	    j	$ra
+     90	
+     91	    .comm	_primes_stat,40
+\end{verbatim}
+
+\subsection{考察}
+
+まず，{\tt auto}変数と{\tt static}変数の違いについて考察する．
+{\tt auto}変数とは，関数内で動的に確保され，その関数が終了するまで値を保持し続ける変数である．今回与えられたプログラム内では{\tt primes\_auto}が該当する．
+また，アセンブリコード内では{\tt main}ラベルの直後で64バイトのスタックが確保されており，
+{\tt primes\_auto}の値を保存するためにスタック領域が利用されているということが分かる．ここで，確保するスタックのサイズが64バイトとなっているのは，
+手続き呼び出し規約で定められている最低限のスタックサイズ24バイトと{\tt primes\_auto}の値を格納するために必要な領域（$4 × 10 = 40$バイト）の和が64バイトだからである．
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{課題2-4}
