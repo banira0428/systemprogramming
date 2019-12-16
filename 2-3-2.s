@@ -15,39 +15,19 @@
 	.text
 	.align	2
 main:
-	subu	$sp,$sp,72
-	sw	$ra,68($sp)
-	sw	$fp,64($sp)
+	subu	$sp,$sp,32
+	sw	$ra,28($sp)
+	sw	$fp,24($sp)
 	move	$fp,$sp
-	.set	noreorder
-	nop
-	.set	reorder
-	sw	$zero,56($fp)
-$L3:
-	lw	$v0,56($fp)
-	slt	$v0,$v0,10
-	bne	$v0,$zero,$L6
-	j	$L4
-$L6:
-	lw	$v0,56($fp)
-	sll	$v1,$v0,2
-	addu	$v0,$fp,16
-	addu	$v1,$v0,$v1
-	lw	$v0,56($fp)
-	sw	$v0,0($v1)
-	lw	$v0,56($fp)
-	sll	$v1,$v0,2
-	addu	$v0,$fp,16
-	addu	$v0,$v0,$v1
-	lw	$a0,0($v0)
+	sw	$zero,16($fp)
+	li	$v0,1			# 0x1
+	sw	$v0,20($fp)
+	lw	$a0,16($fp)
 	jal	_print_int
-	lw	$v0,56($fp)
-	addu	$v0,$v0,1
-	sw	$v0,56($fp)
-	j	$L3
-$L4:
+	lw	$a0,20($fp)
+	jal	_print_int
 	move	$sp,$fp
-	lw	$ra,68($sp)
-	lw	$fp,64($sp)
-	addu	$sp,$sp,72
+	lw	$ra,28($sp)
+	lw	$fp,24($sp)
+	addu	$sp,$sp,32
 	j	$ra
