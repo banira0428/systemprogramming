@@ -6,5 +6,5 @@ char string_ary[] = "ABCDEFG";
 main()
 {
     string_ptr = "AB";
-    string_ary = "AB";
+    //string_ary = "AB"; コンパイルエラー発生
 }
