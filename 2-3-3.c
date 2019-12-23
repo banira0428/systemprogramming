@@ -1,5 +1,3 @@
-int primes_stat[10];
-
 char *string_ptr = "ABCDEFG";
 char string_ary[] = "ABCDEFG";
 
