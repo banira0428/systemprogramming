@@ -7,16 +7,13 @@ void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("あああ%dああああ", 1);
+    myprintf("あああ%d%dああああ", 1, 3);
     return 1;
 }
 
 void myprintf(char *fmt, ...)
 {
-
-    printf("%d",((sizeof(fmt) + 3) / 4) * 4);
-
-    char *p = (char *)&fmt + 4;//((sizeof(fmt) + 3) / 4) * 4;
+    char *p = (char *)&fmt + 4; // ((sizeof(fmt) + 3) / 4) * 4; 実行環境に応じて変える
     while (*fmt)
     {
         if (*fmt == '%')
@@ -30,7 +27,7 @@ void myprintf(char *fmt, ...)
                 break;
             case 'd':
                 printf("%d", *(int *)p);
-                p = p + ((sizeof(int) + 3) / 4) * 4;
+                p = p + sizeof(int); // ((sizeof(int) + 3) / 4) * 4;
                 break;
             case 'u':
                 break;
