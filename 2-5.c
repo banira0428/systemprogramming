@@ -1,6 +1,8 @@
 #include <stdio.h> //デバッグ用，あとで消す 自分で作ったsyscalls.sを使え
 #include <string.h>
 
+#define ROUNDUP_SIZEOF(a) ((sizeof(a) + 3) / 4 * 4)
+
 void myprintf(char *fmt, ...);
 
 int main()
@@ -11,14 +13,12 @@ int main()
 
 void myprintf(char *fmt, ...)
 {
-    int d;
 
-    int *arg;
+    printf("%d",((sizeof(fmt) + 3) / 4) * 4);
+
+    char *p = (char *)&fmt + 4;//((sizeof(fmt) + 3) / 4) * 4;
     while (*fmt)
     {
-
-        
-
         if (*fmt == '%')
         {
             fmt++;
@@ -29,9 +29,8 @@ void myprintf(char *fmt, ...)
             case 's':
                 break;
             case 'd':
-                d = ((char *)&fmt) + ((sizeof(fmt) + 3) / 4) * 4;
-                printf("%d", d);
-
+                printf("%d", *(int *)p);
+                p = p + ((sizeof(int) + 3) / 4) * 4;
                 break;
             case 'u':
                 break;
@@ -46,14 +45,13 @@ void myprintf(char *fmt, ...)
             default:
                 break;
             }
-
         }
         else
         {
             printf("%c", *fmt);
-            fmt++;
         }
+        fmt++;
     }
-    printf("\n", d);
+    printf("\n");
     return;
 }
