@@ -31,13 +31,22 @@ _fun:
 	.align	2
 $LC0:
 	.asciiz	"a"
+	.align	2
+$LC1:
+	.asciiz	"b"
 	.text
 	.align	2
 main:
-	subu	$sp,$sp,24
-	sw	$ra,20($sp)
-	sw	$fp,16($sp)
+	subu	$sp,$sp,40
+	sw	$ra,36($sp)
+	sw	$fp,32($sp)
 	move	$fp,$sp
+	li	$v0,2			# 0x2
+	sw	$v0,16($sp)
+	li	$v0,98			# 0x62
+	sw	$v0,20($sp)
+	la	$v0,$LC1
+	sw	$v0,24($sp)
 	li	$a0,1			# 0x1
 	li	$a1,1			# 0x1
 	li	$a2,97			# 0x61
@@ -45,7 +54,7 @@ main:
 	jal	_fun
 	move	$v0,$zero
 	move	$sp,$fp
-	lw	$ra,20($sp)
-	lw	$fp,16($sp)
-	addu	$sp,$sp,24
+	lw	$ra,36($sp)
+	lw	$fp,32($sp)
+	addu	$sp,$sp,40
 	j	$ra
