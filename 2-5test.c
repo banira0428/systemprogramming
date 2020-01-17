@@ -1,10 +1,14 @@
-#define ROUNDUP_SIZEOF(a) ((sizeof(a) + 3) / 4 * 4)
+#include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("%2s", "aaaaafafafa");
+    myprintf("%.2s", "aaaaa");
+    myprintf("%+10d|", 12345);
+    printf("%+10d|\n", 12345);
     return 1;
 }
 
@@ -74,7 +78,7 @@ char get_char_for_fill(int is_zero)
 void print_plus(int is_plus)
 {
     if (is_plus)
-        print_char('+');
+        printf("+");
 }
 
 void print_fill(int size, int is_zero)
@@ -82,7 +86,7 @@ void print_fill(int size, int is_zero)
     int i;
     for (i = 0; i < size; i++)
     {
-        print_char(get_char_for_fill(is_zero));
+        printf("%c", get_char_for_fill(is_zero));
     }
 }
 
@@ -95,20 +99,8 @@ void print_limited_string(int limit, char *str)
         {
             break;
         }
-        print_char(*str);
+        printf("%c", *str);
     }
-}
-
-int strlen(char *str)
-{
-    int length = 0;
-
-    while (*str++ != '\0')
-    {
-        length++;
-    }
-
-    return length;
 }
 
 void print_base(int num, int base)
@@ -123,11 +115,11 @@ void print_base(int num, int base)
 
     if (surplus >= 10)
     {
-        print_char('a' + surplus - 10);
+        printf("%c", 'a' + surplus - 10);
     }
     else
     {
-        print_int(surplus);
+        printf("%d", surplus);
     }
     return;
 }
@@ -140,7 +132,13 @@ void myprintf(char *fmt, ...)
     int is_left = 0;
     int is_plus = 0;
 
-    char *p = (char *)&fmt + ROUNDUP_SIZEOF(fmt);
+    char *value;
+    int num;
+
+    va_list args;
+
+    va_start(args, fmt);
+
     while (*fmt)
     {
         if (*fmt == '%')
@@ -183,74 +181,45 @@ void myprintf(char *fmt, ...)
             switch (*fmt)
             {
             case 'c':
-                print_char(*(char *)p); //syscallsに新しく追加した（レポートに書く）
-                p += ROUNDUP_SIZEOF(char);
                 break;
             case 's':
+
+                value = va_arg(args, char *);
+
                 if (is_left == 1)
                 {
-                    print_limited_string(rightrange, *(char **)p);
-                    print_fill(max(leftrange - strlen(*(char **)p), 0), 0);
+                    print_limited_string(rightrange, value);
+                    print_fill(max(leftrange - strlen(value), 0), 0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - strlen(*(char **)p), 0), 0);
-                    print_limited_string(rightrange, *(char **)p);
+                    print_fill(max(leftrange - strlen(value), 0), 0);
+                    print_limited_string(rightrange, value);
                 }
-                p += ROUNDUP_SIZEOF(char *);
                 break;
             case 'd':
+                num = va_arg(args, int);
+
                 if (is_left == 1)
                 {
                     print_plus(is_plus);
-                    print_int(*(int *)p);
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), 0);
+                    printf("%d", num);
+                    print_fill(max(leftrange - get_digit(num) - is_plus, 0), read_zero == 1 && is_left == 0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), read_zero == 1);
+                    print_fill(max(leftrange - get_digit(num) - is_plus, 0), read_zero == 1 && is_left == 0);
                     print_plus(is_plus);
-                    print_int(*(int *)p);
+                    printf("%d", num);
                 }
-                p += ROUNDUP_SIZEOF(int);
                 break;
             case 't':
-                if (is_left == 1)
-                {
-                    print_plus(is_plus);
-                    print_int(*(int *)p * 1.1);
-                    print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), 0);
-                }
-                else
-                {
-                    print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), read_zero == 1);
-                    print_plus(is_plus);
-                    print_int(*(int *)p * 1.1);
-                }
-                p += ROUNDUP_SIZEOF(int);
                 break;
             case 'o':
-                if(is_left == 1)
-                {
-                    print_plus(is_plus);
-                    print_base(*(int *)p, 8);
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), 0);
-                }
-                else
-                {
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), read_zero == 1);
-                    print_plus(is_plus);
-                    print_base(*(int *)p, 8);
-                }
-                p += ROUNDUP_SIZEOF(int);
                 break;
             case 'x':
-            
-                print_base(*(int *)p, 16);
-                p += ROUNDUP_SIZEOF(int);
                 break;
             case '%':
-                print_char('%');
                 break;
             default:
                 break;
@@ -258,10 +227,13 @@ void myprintf(char *fmt, ...)
         }
         else
         {
-            print_char(*fmt);
+            printf("%c", *fmt);
         }
         fmt++;
     }
-    print_char('\n');
+    printf("\n");
+
+    va_end(args);
+
     return;
 }
