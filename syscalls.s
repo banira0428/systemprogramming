@@ -49,4 +49,14 @@ _exit:
  li      $v0, 10
  syscall
 
+_print_char:
+ subu    $sp,$sp,24
+ sw      $ra,20($sp)
+
+ li      $v0, 11
+ syscall
+
+ lw      $ra,20($sp)
+ addu    $sp,$sp,24
+ j       $ra 
  
