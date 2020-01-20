@@ -6,8 +6,6 @@ int main()
     return 1;
 }
 
-void myprintf(char *fmt, ...);
-
 int max(int a, int b)
 {
     if (a > b)
@@ -35,7 +33,9 @@ int min(int a, int b)
 int get_digit(int a)
 {
     if (a == 0)
+    {
         return 0;
+    }
 
     int digit = 0;
 
@@ -190,7 +190,7 @@ void myprintf(char *fmt, ...)
 
                 if (rightrange == 0)
                 {
-                    rightrange = strlen(value);
+                    rightrange = strlen(*(char **)p);
                 }
 
                 if (is_left == 1)
