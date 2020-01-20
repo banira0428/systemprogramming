@@ -4,24 +4,26 @@ void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("one character [%c]", 'a');
-    myprintf("string [%s]", "hello");
-    myprintf("decimal 100 = [%d]", 100);
-    myprintf("octal 100 = [%o]", 100);
-    myprintf("hexadecimal 100 = [%x]", 100);
-    myprintf("escape %% [%%]");
-    myprintf("max 10 characters [%10s]", "hello");
-    myprintf("limit two characters [%.2s]", "hello");
-    myprintf("max 5 digits decimal [%5d]", 100);
-    myprintf("max 5 digits octal [%5o]", 100);
-    myprintf("max 5 digits hexadecimal [%5x]", 100);
-    myprintf("zero padding decimal [%05d]", 100);
-    myprintf("zero padding octal [%05o]", 100);
-    myprintf("zero padding hexadecimal [%05x]", 100);
-    myprintf("left decimal [%-5d]", 100);
-    myprintf("left octal [%-5o]", 100);
-    myprintf("left hexadecimal [%-5x]", 100);
-    myprintf("sign [%+d]", 100);
+    myprintf("one character [a] = [%c]", 'a');
+    myprintf("string [hello] = [%s]", "hello");
+    myprintf("decimal [100] = [%d]", 100);
+    myprintf("octal [100] = [%o]", 100);
+    myprintf("hexadecimal [100] = [%x]", 100);
+    myprintf("escape [%%] = [%%]");
+    myprintf("max 10 characters [hello] = [%10s]", "hello");
+    myprintf("limit two characters [hello] = [%.2s]", "hello");
+    myprintf("max 5 digits decimal [100] = [%5d]", 100);
+    myprintf("max 5 digits octal [100] = [%5o]", 100);
+    myprintf("max 5 digits hexadecimal [100] = [%5x]", 100);
+    myprintf("zero padding max 5 digits decimal [100] = [%05d]", 100);
+    myprintf("zero padding max 5 digits octal [100] = [%05o]", 100);
+    myprintf("zero padding max 5 digits hexadecimal [100] = [%05x]", 100);
+    myprintf("left max 5 digits decimal [100] = [%-5d]", 100);
+    myprintf("left max 5 digits octal [100] = [%-5o]", 100);
+    myprintf("left max 5 digits hexadecimal [100] = [%-5x]", 100);
+    myprintf("signed decimal [100] = [%+d]", 100);
+    myprintf("signed octal [100] = [%+d]", 100);
+    myprintf("signed hexadecimal [100] = [%+d]", 100);
 
     return 1;
 }
@@ -218,11 +220,13 @@ void myprintf(char *fmt, ...)
                 if (is_left == 1)
                 {
                     print_limited_string(rightrange, *(char **)p);
-                    print_fill(max(leftrange - strlen(*(char **)p), 0), 0);
+                    print_fill(
+                        max(leftrange - strlen(*(char **)p), 0), 0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - strlen(*(char **)p), 0), 0);
+                    print_fill(
+                        max(leftrange - strlen(*(char **)p), 0), 0);
                     print_limited_string(rightrange, *(char **)p);
                 }
                 p += ROUNDUP_SIZEOF(char *);

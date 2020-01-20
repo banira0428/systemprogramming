@@ -745,6 +745,52 @@ C言語で可変引数を扱う際には{\tt void printf(char *fmt,...)}の様�
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\subsection{プログラムの作成方針}
+今回のプログラムを作成するに当たって，以下の部分から構成することにした．
+
+\begin{itemize}
+      \item 作成したサブセットそれぞれをテストする部分
+      \item 与えられたフォーマット指定子を元に，引数を適切に出力する部分
+      \item 表示桁数や0埋めなどの指定を元に，要素を修飾していく部分
+\end{itemize}
+
+\subsection{プログラムおよびその説明}
+
+以下では，前節の作成方針における分類に基づいて，プログラムの大まかな構造について解説する．
+また，プログラムのソースコードについては\ref{sec:sourcecode}節に添付している．
+
+\subsubsection{テスト部（5行目から27行目）}
+この部分では，表\ref{tbl:2-5}に示された，今回実装したサブセットについて，網羅的にテストを行っている．
+
+\begin{table}[]
+      \centering
+      \caption{実装したサブセット}
+      \label{tbl:2-5}
+      \begin{tabular}{|l|l|l|l|}
+            \hline
+            サブセット & 種別 & 型 & 内容                  \\ \hline
+            \%c   & 変換指定子 & char  & 任意の一文字を出力           \\ \hline
+            \%s   & 変換指定子 & char* & 任意の文字列を出力           \\ \hline
+            \%d   & 変換指定子 & int   & 任意の数値を出力（10進数表記）    \\ \hline
+            \%o   & 変換指定子 & int   & 任意の数値を出力（8進数表記）     \\ \hline
+            \%x   & 変換指定子 & int   & 任意の整数を出力（16進数表記）    \\ \hline
+            \%-  & フラグ & 無し    & 左詰め           \\ \hline
+            \%0  & フラグ & 無し    & 0埋め             \\ \hline
+            \%+  & フラグ & 無し    & 符号を表示         \\ \hline
+            \%n（任意の整数）  & その他 & 無し    & n文字表示（最大文字数）   \\ \hline
+            \%.n （任意の整数） & その他 & 無し    & 表示文字数の上限を指定（\%sでのみ動作）   \\ \hline
+            \%\%  & その他 & 無し    & "\%"を出力             \\ \hline
+      \end{tabular}
+\end{table}
+
+\subsubsection{引数出力部（157行目から320行目）}
+
+この部分では，与えられた文字列{{\tt fmt}}を解析し，\%があれば，後述する要素修飾部を実行した後，
+表\ref{tbl:2-5}の変換指定子を元にどの型が可変引数として与えられたかを推定し，システムコールを用いて値を出力する．
+
+\subsubsection{要素修飾部（172行目から203行目）}
+
+この部分では{{\tt fmt}}を解析し，\%を発見した後，表\ref{tbl:2-5}のフラグや表示桁数を読み取り，出力する文字を適切に装飾する．
 
 \subsection{実行結果}
 \begin{verbatim}
@@ -768,25 +814,6 @@ left hexadecimal [64   ]
 sign [+100]
 \end{verbatim}
 
-\subsection{実装したサブセット}
-課題のプログラムで実現したサブセットについて，表\ref{tbl:2-5}に示す．
-
-\begin{table}[]
-      \centering
-      \caption{実装したサブセット}
-      \label{tbl:2-5}
-      \begin{tabular}{|l|l|l|}
-            \hline
-            サブセット & 引数の型  & 内容                  \\ \hline
-            \%c   & char  & 任意の一文字を出力           \\ \hline
-            \%s   & char* & 任意の文字列を出力           \\ \hline
-            \%d   & int   & 任意の数値を出力（10進数表記）    \\ \hline
-            \%o   & int   & 任意の数値を出力（8進数表記）     \\ \hline
-            \%x   & int   & 任意の整数を出力（16進数表記）    \\ \hline
-            \%\%  & 無し    & "\%"を出力             \\ \hline
-      \end{tabular}
-\end{table}
-
 \subsection{考察}
 課題のプログラムを作成する上で，まず最初に気をつけた点は可変引数の取り扱いである．前の課題で述べた様に，
 与えられた引数の型に応じて加算するアドレスの大きさを変えなければならないので，{{\tt switch}}文で分岐し，
@@ -808,9 +835,8 @@ sign [+100]
 
 この関数は，引数として基数も受け取れるようにしているので，8進数や16進数以外の表示することも可能である．（今回のプログラムでは$10 + 26$で36進数まで対応可能）
 
-他に工夫した点としては，
 
-\subsection{作成したプログラム}
+\subsection{作成したプログラム}\label{sec:sourcecode}
 \begin{verbatim}
       1	#define ROUNDUP_SIZEOF(a) ((sizeof(a) + 3) / 4 * 4)
       2	
@@ -1032,106 +1058,108 @@ sign [+100]
     218	                if (is_left == 1)
     219	                {
     220	                    print_limited_string(rightrange, *(char **)p);
-    221	                    print_fill(max(leftrange - strlen(*(char **)p), 0), 0);
-    222	                }
-    223	                else
-    224	                {
-    225	                    print_fill(max(leftrange - strlen(*(char **)p), 0), 0);
-    226	                    print_limited_string(rightrange, *(char **)p);
-    227	                }
-    228	                p += ROUNDUP_SIZEOF(char *);
-    229	                break;
-    230	            case 'd':
-    231	                if (is_left == 1)
-    232	                {
-    233	                    print_plus(is_plus);
-    234	                    print_int(*(int *)p);
-    235	                    print_fill(
-    236	                        max(
-    237	                            leftrange -
-    238	                                get_digit(*(int *)p, 10) - is_plus,
-    239	                            0),
-    240	                        0);
-    241	                }
-    242	                else
-    243	                {
-    244	                    print_fill(
-    245	                        max(
-    246	                            leftrange -
-    247	                                get_digit(*(int *)p, 10) - is_plus,
-    248	                            0),
-    249	                        read_zero == 1);
-    250	                    print_plus(is_plus);
-    251	                    print_int(*(int *)p);
-    252	                }
-    253	                p += ROUNDUP_SIZEOF(int);
-    254	                break;
-    255	            case 'o':
-    256	                if (is_left == 1)
-    257	                {
-    258	                    print_plus(is_plus);
-    259	                    print_base(*(int *)p, 8);
-    260	                    print_fill(
-    261	                        max(
-    262	                            leftrange -
-    263	                                get_digit(*(int *)p, 8) - is_plus,
-    264	                            0),
-    265	                        0);
-    266	                }
-    267	                else
-    268	                {
-    269	                    print_fill(
-    270	                        max(
-    271	                            leftrange -
-    272	                                get_digit(*(int *)p, 8) - is_plus,
-    273	                            0),
-    274	                        read_zero == 1);
-    275	                    print_plus(is_plus);
-    276	                    print_base(*(int *)p, 8);
-    277	                }
-    278	                p += ROUNDUP_SIZEOF(int);
-    279	                break;
-    280	            case 'x':
-    281	                if (is_left == 1)
-    282	                {
-    283	                    print_plus(is_plus);
-    284	                    print_base(*(int *)p, 16);
-    285	                    print_fill(
-    286	                        max(
-    287	                            leftrange -
-    288	                                get_digit(*(int *)p, 16) - is_plus,
-    289	                            0),
-    290	                        0);
-    291	                }
-    292	                else
-    293	                {
-    294	                    print_fill(
-    295	                        max(
-    296	                            leftrange -
-    297	                                get_digit(*(int *)p, 16) - is_plus,
-    298	                            0),
-    299	                        read_zero == 1);
-    300	                    print_plus(is_plus);
-    301	                    print_base(*(int *)p, 16);
-    302	                }
-    303	                p += ROUNDUP_SIZEOF(int);
-    304	                break;
-    305	            case '%':
-    306	                print_char('%');
-    307	                break;
-    308	            default:
+    221	                    print_fill(
+    222	                        max(leftrange - strlen(*(char **)p), 0), 0);
+    223	                }
+    224	                else
+    225	                {
+    226	                    print_fill(
+    227	                        max(leftrange - strlen(*(char **)p), 0), 0);
+    228	                    print_limited_string(rightrange, *(char **)p);
+    229	                }
+    230	                p += ROUNDUP_SIZEOF(char *);
+    231	                break;
+    232	            case 'd':
+    233	                if (is_left == 1)
+    234	                {
+    235	                    print_plus(is_plus);
+    236	                    print_int(*(int *)p);
+    237	                    print_fill(
+    238	                        max(
+    239	                            leftrange -
+    240	                                get_digit(*(int *)p, 10) - is_plus,
+    241	                            0),
+    242	                        0);
+    243	                }
+    244	                else
+    245	                {
+    246	                    print_fill(
+    247	                        max(
+    248	                            leftrange -
+    249	                                get_digit(*(int *)p, 10) - is_plus,
+    250	                            0),
+    251	                        read_zero == 1);
+    252	                    print_plus(is_plus);
+    253	                    print_int(*(int *)p);
+    254	                }
+    255	                p += ROUNDUP_SIZEOF(int);
+    256	                break;
+    257	            case 'o':
+    258	                if (is_left == 1)
+    259	                {
+    260	                    print_plus(is_plus);
+    261	                    print_base(*(int *)p, 8);
+    262	                    print_fill(
+    263	                        max(
+    264	                            leftrange -
+    265	                                get_digit(*(int *)p, 8) - is_plus,
+    266	                            0),
+    267	                        0);
+    268	                }
+    269	                else
+    270	                {
+    271	                    print_fill(
+    272	                        max(
+    273	                            leftrange -
+    274	                                get_digit(*(int *)p, 8) - is_plus,
+    275	                            0),
+    276	                        read_zero == 1);
+    277	                    print_plus(is_plus);
+    278	                    print_base(*(int *)p, 8);
+    279	                }
+    280	                p += ROUNDUP_SIZEOF(int);
+    281	                break;
+    282	            case 'x':
+    283	                if (is_left == 1)
+    284	                {
+    285	                    print_plus(is_plus);
+    286	                    print_base(*(int *)p, 16);
+    287	                    print_fill(
+    288	                        max(
+    289	                            leftrange -
+    290	                                get_digit(*(int *)p, 16) - is_plus,
+    291	                            0),
+    292	                        0);
+    293	                }
+    294	                else
+    295	                {
+    296	                    print_fill(
+    297	                        max(
+    298	                            leftrange -
+    299	                                get_digit(*(int *)p, 16) - is_plus,
+    300	                            0),
+    301	                        read_zero == 1);
+    302	                    print_plus(is_plus);
+    303	                    print_base(*(int *)p, 16);
+    304	                }
+    305	                p += ROUNDUP_SIZEOF(int);
+    306	                break;
+    307	            case '%':
+    308	                print_char('%');
     309	                break;
-    310	            }
-    311	        }
-    312	        else
-    313	        {
-    314	            print_char(*fmt);
-    315	        }
-    316	        fmt++;
-    317	    }
-    318	    print_char('\n');
-    319	    return;
-    320	} 
+    310	            default:
+    311	                break;
+    312	            }
+    313	        }
+    314	        else
+    315	        {
+    316	            print_char(*fmt);
+    317	        }
+    318	        fmt++;
+    319	    }
+    320	    print_char('\n');
+    321	    return;
+    322	} 
 \end{verbatim}
 
 
