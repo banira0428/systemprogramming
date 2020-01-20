@@ -224,21 +224,21 @@ void myprintf(char *fmt, ...)
                 }
                 p += ROUNDUP_SIZEOF(int);
                 break;
-            case 't':
-                if (is_left == 1)
-                {
-                    print_plus(is_plus);
-                    print_int(*(int *)p * 1.1);
-                    print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), 0);
-                }
-                else
-                {
-                    print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), read_zero == 1);
-                    print_plus(is_plus);
-                    print_int(*(int *)p * 1.1);
-                }
-                p += ROUNDUP_SIZEOF(int);
-                break;
+            // case 't':
+            //     if (is_left == 1)
+            //     {
+            //         print_plus(is_plus);
+            //         print_int(*(int *)p * 1.1);
+            //         print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), 0);
+            //     }
+            //     else
+            //     {
+            //         print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), read_zero == 1);
+            //         print_plus(is_plus);
+            //         print_int(*(int *)p * 1.1);
+            //     }
+            //     p += ROUNDUP_SIZEOF(int);
+            //     break;
             case 'o':
                 if (is_left == 1)
                 {
