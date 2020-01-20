@@ -1,5 +1,7 @@
 #define ROUNDUP_SIZEOF(a) ((sizeof(a) + 3) / 4 * 4)
 
+void myprintf(char *fmt, ...);
+
 int main()
 {
     myprintf("%s", "aa");
