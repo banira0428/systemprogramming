@@ -4,24 +4,24 @@ void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("one character [%c]",'a');
+    myprintf("one character [%c]", 'a');
     myprintf("string [%s]", "hello");
-    myprintf("decimal 100 = [%d]",100);
-    myprintf("octal 100 = [%o]",100);
-    myprintf("hexadecimal 100 = [%x]",100);
+    myprintf("decimal 100 = [%d]", 100);
+    myprintf("octal 100 = [%o]", 100);
+    myprintf("hexadecimal 100 = [%x]", 100);
     myprintf("escape %% [%%]");
-    myprintf("max 10 characters [%10s]","hello");
-    myprintf("limit two characters [%.2s]","hello");
-    myprintf("max 5 digits decimal [%5d]",100);
-    myprintf("max 5 digits octal [%5o]",100);
-    myprintf("max 5 digits hexadecimal [%5x]",100);
-    myprintf("zero padding decimal [%05d]",100);
-    myprintf("zero padding octal [%05o]",100);
-    myprintf("zero padding hexadecimal [%05x]",100);
-    myprintf("left decimal [%-5d]",100);
-    myprintf("left octal [%-5o]",100);
-    myprintf("left hexadecimal [%-5x]",100);
-    myprintf("sign [%+d]",100);
+    myprintf("max 10 characters [%10s]", "hello");
+    myprintf("limit two characters [%.2s]", "hello");
+    myprintf("max 5 digits decimal [%5d]", 100);
+    myprintf("max 5 digits octal [%5o]", 100);
+    myprintf("max 5 digits hexadecimal [%5x]", 100);
+    myprintf("zero padding decimal [%05d]", 100);
+    myprintf("zero padding octal [%05o]", 100);
+    myprintf("zero padding hexadecimal [%05x]", 100);
+    myprintf("left decimal [%-5d]", 100);
+    myprintf("left octal [%-5o]", 100);
+    myprintf("left hexadecimal [%-5x]", 100);
+    myprintf("sign [%+d]", 100);
 
     return 1;
 }
@@ -50,7 +50,7 @@ int min(int a, int b)
     }
 }
 
-int get_digit(int a,int base)
+int get_digit(int a, int base)
 {
     int digit = 0;
 
@@ -195,17 +195,17 @@ void myprintf(char *fmt, ...)
             }
 
             leftrange = get_range(fmt);
-            fmt += get_digit(leftrange,10);
+            fmt += get_digit(leftrange, 10);
             if (*fmt == '.')
             {
                 rightrange = get_range(++fmt);
-                fmt += get_digit(rightrange,10);
+                fmt += get_digit(rightrange, 10);
             }
 
             switch (*fmt)
             {
             case 'c':
-                print_char(*(char *)p); //syscallsに新しく追加した（レポートに書く）
+                print_char(*(char *)p);
                 p += ROUNDUP_SIZEOF(char);
                 break;
             case 's':
@@ -232,11 +232,21 @@ void myprintf(char *fmt, ...)
                 {
                     print_plus(is_plus);
                     print_int(*(int *)p);
-                    print_fill(max(leftrange - get_digit(*(int *)p,10) - is_plus, 0), 0);
+                    print_fill(
+                        max(
+                            leftrange -
+                                get_digit(*(int *)p, 10) - is_plus,
+                            0),
+                        0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - get_digit(*(int *)p,10) - is_plus, 0), read_zero == 1);
+                    print_fill(
+                        max(
+                            leftrange -
+                                get_digit(*(int *)p, 10) - is_plus,
+                            0),
+                        read_zero == 1);
                     print_plus(is_plus);
                     print_int(*(int *)p);
                 }
@@ -247,26 +257,46 @@ void myprintf(char *fmt, ...)
                 {
                     print_plus(is_plus);
                     print_base(*(int *)p, 8);
-                    print_fill(max(leftrange - get_digit(*(int *)p,8) - is_plus, 0), 0);
+                    print_fill(
+                        max(
+                            leftrange -
+                                get_digit(*(int *)p, 8) - is_plus,
+                            0),
+                        0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - get_digit(*(int *)p,8) - is_plus, 0), read_zero == 1);
+                    print_fill(
+                        max(
+                            leftrange -
+                                get_digit(*(int *)p, 8) - is_plus,
+                            0),
+                        read_zero == 1);
                     print_plus(is_plus);
                     print_base(*(int *)p, 8);
                 }
                 p += ROUNDUP_SIZEOF(int);
                 break;
             case 'x':
-if (is_left == 1)
+                if (is_left == 1)
                 {
                     print_plus(is_plus);
                     print_base(*(int *)p, 16);
-                    print_fill(max(leftrange - get_digit(*(int *)p,16) - is_plus, 0), 0);
+                    print_fill(
+                        max(
+                            leftrange -
+                                get_digit(*(int *)p, 16) - is_plus,
+                            0),
+                        0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - get_digit(*(int *)p,16) - is_plus, 0), read_zero == 1);
+                    print_fill(
+                        max(
+                            leftrange -
+                                get_digit(*(int *)p, 16) - is_plus,
+                            0),
+                        read_zero == 1);
                     print_plus(is_plus);
                     print_base(*(int *)p, 16);
                 }
