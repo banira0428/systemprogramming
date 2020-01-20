@@ -753,6 +753,26 @@ C言語で可変引数を扱う際には{\tt void printf(char *fmt,...)}の様�
 \end{verbatim}
 
 \subsection{実行結果}
+\begin{verbatim}
+one character [a]
+string [hello]
+decimal 100 = [100]
+octal 100 = [144]
+hexadecimal 100 = [64]
+escape % [%]
+max 10 characters [     hello]
+limit two characters [he]
+max 5 digits decimal [  100]
+max 5 digits octal [  144]
+max 5 digits hexadecimal [   64]
+zero padding decimal [00100]
+zero padding octal [00144]
+zero padding hexadecimal [00064]
+left decimal [100  ]
+left octal [144  ]
+left hexadecimal [64   ]
+sign [+100]
+\end{verbatim}
 
 \subsection{実装したサブセット}
 課題のプログラムで実現したサブセットについて，表\ref{tbl:2-5}に示す．
