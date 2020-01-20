@@ -1,12 +1,12 @@
 #define ROUNDUP_SIZEOF(a) ((sizeof(a) + 3) / 4 * 4)
 
-void myprintf(char *fmt, ...);
-
 int main()
 {
     myprintf("%s", "aa");
     return 1;
 }
+
+void myprintf(char *fmt, ...);
 
 int max(int a, int b)
 {
