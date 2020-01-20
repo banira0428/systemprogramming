@@ -4,7 +4,7 @@ void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("%2s", "aaaaafafafa");
+    myprintf("%s", "aa");
     return 1;
 }
 
@@ -187,6 +187,12 @@ void myprintf(char *fmt, ...)
                 p += ROUNDUP_SIZEOF(char);
                 break;
             case 's':
+
+                if (rightrange == 0)
+                {
+                    rightrange = strlen(value);
+                }
+
                 if (is_left == 1)
                 {
                     print_limited_string(rightrange, *(char **)p);
@@ -230,7 +236,7 @@ void myprintf(char *fmt, ...)
                 p += ROUNDUP_SIZEOF(int);
                 break;
             case 'o':
-                if(is_left == 1)
+                if (is_left == 1)
                 {
                     print_plus(is_plus);
                     print_base(*(int *)p, 8);
@@ -245,7 +251,7 @@ void myprintf(char *fmt, ...)
                 p += ROUNDUP_SIZEOF(int);
                 break;
             case 'x':
-            
+
                 print_base(*(int *)p, 16);
                 p += ROUNDUP_SIZEOF(int);
                 break;

@@ -6,7 +6,8 @@ void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("%.2s", "aaaaa");
+    myprintf("%5s", "aa");
+    printf("%5s\n", "aa");
     myprintf("%+10d|", 12345);
     printf("%+10d|\n", 12345);
     return 1;
@@ -185,6 +186,11 @@ void myprintf(char *fmt, ...)
             case 's':
 
                 value = va_arg(args, char *);
+
+                if (rightrange == 0)
+                {
+                    rightrange = strlen(value);
+                }
 
                 if (is_left == 1)
                 {
