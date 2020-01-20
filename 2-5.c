@@ -4,21 +4,25 @@ void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("%c",'a');
-    myprintf("%s", "hello");
-    myprintf("%d",100);
-    myprintf("%o",100);
-    myprintf("%x",100);
-    myprintf("%%");
-    myprintf("%10s","hello");
-    myprintf("%.2s","hello");
-    myprintf("%05d",100);
-    myprintf("%5x",100);
-    myprintf("%-d",100);
-    myprintf("%+d",100);
+    myprintf("one character [%c]",'a');
+    myprintf("string [%s]", "hello");
+    myprintf("decimal 100 = [%d]",100);
+    myprintf("octal 100 = [%o]",100);
+    myprintf("hexadecimal 100 = [%x]",100);
+    myprintf("escape %% [%%]");
+    myprintf("max 10 characters [%10s]","hello");
+    myprintf("limit two characters [%.2s]","hello");
+    myprintf("max 5 digits decimal [%5d]",100);
+    myprintf("max 5 digits octal [%5o]",100);
+    myprintf("max 5 digits hexadecimal [%5x]",100);
+    myprintf("zero padding decimal [%05d]",100);
+    myprintf("zero padding octal [%05o]",100);
+    myprintf("zero padding hexadecimal [%05x]",100);
+    myprintf("left decimal [%-5d]",100);
+    myprintf("left octal [%-5o]",100);
+    myprintf("left hexadecimal [%-5x]",100);
+    myprintf("sign [%+d]",100);
 
-
-    
     return 1;
 }
 
@@ -113,7 +117,7 @@ void print_limited_string(int limit, char *str)
         {
             break;
         }
-        print_char(*str);
+        print_char(*str++);
     }
 }
 
