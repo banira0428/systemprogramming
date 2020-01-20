@@ -32,19 +32,21 @@ int min(int a, int b)
 
 int get_digit(int a)
 {
+    int digit = 0;
+
     if (a == 0)
     {
         return 0;
     }
-
-    int digit = 0;
-
-    while (a != 0)
+    else
     {
-        a /= 10;
-        digit++;
+        while (a != 0)
+        {
+            a /= 10;
+            digit++;
+        }
+        return digit;
     }
-    return digit;
 }
 
 int get_range(char *str)
