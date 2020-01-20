@@ -103,17 +103,17 @@ void print_limited_string(int limit, char *str)
     }
 }
 
-// int strlen(char *str)
-// {
-//     int length = 0;
+int strlen(char *str)
+{
+    int length = 0;
 
-//     while (*str++ != '\0')
-//     {
-//         length++;
-//     }
+    while (*str++ != '\0')
+    {
+        length++;
+    }
 
-//     return length;
-// }
+    return length;
+}
 
 void print_base(int num, int base)
 {
