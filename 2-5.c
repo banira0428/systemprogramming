@@ -4,7 +4,21 @@ void myprintf(char *fmt, ...);
 
 int main()
 {
-    myprintf("%s", "aa");
+    myprintf("%c",'a');
+    myprintf("%s", "hello");
+    myprintf("%d",100);
+    myprintf("%o",100);
+    myprintf("%x",100);
+    myprintf("%%");
+    myprintf("%10s","hello");
+    myprintf("%.2s","hello");
+    myprintf("%05d",100);
+    myprintf("%5x",100);
+    myprintf("%-d",100);
+    myprintf("%+d",100);
+
+
+    
     return 1;
 }
 
@@ -32,7 +46,7 @@ int min(int a, int b)
     }
 }
 
-int get_digit(int a)
+int get_digit(int a,int base)
 {
     int digit = 0;
 
@@ -44,7 +58,7 @@ int get_digit(int a)
     {
         while (a != 0)
         {
-            a /= 10;
+            a /= base;
             digit++;
         }
         return digit;
@@ -177,11 +191,11 @@ void myprintf(char *fmt, ...)
             }
 
             leftrange = get_range(fmt);
-            fmt += get_digit(leftrange);
+            fmt += get_digit(leftrange,10);
             if (*fmt == '.')
             {
                 rightrange = get_range(++fmt);
-                fmt += get_digit(rightrange);
+                fmt += get_digit(rightrange,10);
             }
 
             switch (*fmt)
@@ -214,49 +228,44 @@ void myprintf(char *fmt, ...)
                 {
                     print_plus(is_plus);
                     print_int(*(int *)p);
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), 0);
+                    print_fill(max(leftrange - get_digit(*(int *)p,10) - is_plus, 0), 0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), read_zero == 1);
+                    print_fill(max(leftrange - get_digit(*(int *)p,10) - is_plus, 0), read_zero == 1);
                     print_plus(is_plus);
                     print_int(*(int *)p);
                 }
                 p += ROUNDUP_SIZEOF(int);
                 break;
-            // case 't':
-            //     if (is_left == 1)
-            //     {
-            //         print_plus(is_plus);
-            //         print_int(*(int *)p * 1.1);
-            //         print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), 0);
-            //     }
-            //     else
-            //     {
-            //         print_fill(max(leftrange - get_digit(*(int *)p * 1.1) - is_plus, 0), read_zero == 1);
-            //         print_plus(is_plus);
-            //         print_int(*(int *)p * 1.1);
-            //     }
-            //     p += ROUNDUP_SIZEOF(int);
-            //     break;
             case 'o':
                 if (is_left == 1)
                 {
                     print_plus(is_plus);
                     print_base(*(int *)p, 8);
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), 0);
+                    print_fill(max(leftrange - get_digit(*(int *)p,8) - is_plus, 0), 0);
                 }
                 else
                 {
-                    print_fill(max(leftrange - get_digit(*(int *)p) - is_plus, 0), read_zero == 1);
+                    print_fill(max(leftrange - get_digit(*(int *)p,8) - is_plus, 0), read_zero == 1);
                     print_plus(is_plus);
                     print_base(*(int *)p, 8);
                 }
                 p += ROUNDUP_SIZEOF(int);
                 break;
             case 'x':
-
-                print_base(*(int *)p, 16);
+if (is_left == 1)
+                {
+                    print_plus(is_plus);
+                    print_base(*(int *)p, 16);
+                    print_fill(max(leftrange - get_digit(*(int *)p,16) - is_plus, 0), 0);
+                }
+                else
+                {
+                    print_fill(max(leftrange - get_digit(*(int *)p,16) - is_plus, 0), read_zero == 1);
+                    print_plus(is_plus);
+                    print_base(*(int *)p, 16);
+                }
                 p += ROUNDUP_SIZEOF(int);
                 break;
             case '%':

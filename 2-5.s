@@ -15,10 +15,43 @@
 	.rdata
 	.align	2
 $LC0:
-	.asciiz	"%s"
+	.asciiz	"%c"
 	.align	2
 $LC1:
-	.asciiz	"aa"
+	.asciiz	"%s"
+	.align	2
+$LC2:
+	.asciiz	"hello"
+	.align	2
+$LC3:
+	.asciiz	"%d"
+	.align	2
+$LC4:
+	.asciiz	"%o"
+	.align	2
+$LC5:
+	.asciiz	"%x"
+	.align	2
+$LC6:
+	.asciiz	"%%"
+	.align	2
+$LC7:
+	.asciiz	"%10s"
+	.align	2
+$LC8:
+	.asciiz	"%.2s"
+	.align	2
+$LC9:
+	.asciiz	"%05d"
+	.align	2
+$LC10:
+	.asciiz	"%5x"
+	.align	2
+$LC11:
+	.asciiz	"%-d"
+	.align	2
+$LC12:
+	.asciiz	"%+d"
 	.text
 	.align	2
 main:
@@ -27,7 +60,39 @@ main:
 	sw	$fp,16($sp)
 	move	$fp,$sp
 	la	$a0,$LC0
-	la	$a1,$LC1
+	li	$a1,97			# 0x61
+	jal	_myprintf
+	la	$a0,$LC1
+	la	$a1,$LC2
+	jal	_myprintf
+	la	$a0,$LC3
+	li	$a1,100			# 0x64
+	jal	_myprintf
+	la	$a0,$LC4
+	li	$a1,100			# 0x64
+	jal	_myprintf
+	la	$a0,$LC5
+	li	$a1,100			# 0x64
+	jal	_myprintf
+	la	$a0,$LC6
+	jal	_myprintf
+	la	$a0,$LC7
+	la	$a1,$LC2
+	jal	_myprintf
+	la	$a0,$LC8
+	la	$a1,$LC2
+	jal	_myprintf
+	la	$a0,$LC9
+	li	$a1,100			# 0x64
+	jal	_myprintf
+	la	$a0,$LC10
+	li	$a1,100			# 0x64
+	jal	_myprintf
+	la	$a0,$LC11
+	li	$a1,100			# 0x64
+	jal	_myprintf
+	la	$a0,$LC12
+	li	$a1,100			# 0x64
 	jal	_myprintf
 	li	$v0,1			# 0x1
 	move	$sp,$fp
@@ -81,6 +146,7 @@ _get_digit:
 	sw	$fp,8($sp)
 	move	$fp,$sp
 	sw	$a0,16($fp)
+	sw	$a1,20($fp)
 	sw	$zero,0($fp)
 	lw	$v0,16($fp)
 	bne	$v0,$zero,$L10
@@ -92,14 +158,10 @@ $L12:
 	bne	$v0,$zero,$L14
 	j	$L13
 $L14:
-	lw	$a0,16($fp)
-	li	$v0,1717960704			# 0x66660000
-	ori	$v0,$v0,0x6667
-	mult	$a0,$v0
-	mfhi	$v0
-	sra	$v1,$v0,2
-	sra	$v0,$a0,31
-	subu	$v0,$v1,$v0
+	lw	$v1,16($fp)
+	lw	$v0,20($fp)
+	div	$0,$v1,$v0
+	mflo	$v0
 	sw	$v0,16($fp)
 	lw	$v0,0($fp)
 	addu	$v0,$v0,1
@@ -250,6 +312,33 @@ $L32:
 	addu	$sp,$sp,32
 	j	$ra
 	.align	2
+_strlen:
+	subu	$sp,$sp,16
+	sw	$fp,8($sp)
+	move	$fp,$sp
+	sw	$a0,16($fp)
+	sw	$zero,0($fp)
+$L37:
+	lw	$v0,16($fp)
+	lbu	$v1,0($v0)
+	addu	$v0,$v0,1
+	sw	$v0,16($fp)
+	sll	$v0,$v1,24
+	sra	$v0,$v0,24
+	bne	$v0,$zero,$L39
+	j	$L38
+$L39:
+	lw	$v0,0($fp)
+	addu	$v0,$v0,1
+	sw	$v0,0($fp)
+	j	$L37
+$L38:
+	lw	$v0,0($fp)
+	move	$sp,$fp
+	lw	$fp,8($sp)
+	addu	$sp,$sp,16
+	j	$ra
+	.align	2
 _print_base:
 	subu	$sp,$sp,32
 	sw	$ra,28($sp)
@@ -268,23 +357,23 @@ _print_base:
 	mflo	$v0
 	sw	$v0,20($fp)
 	lw	$v0,20($fp)
-	beq	$v0,$zero,$L37
+	beq	$v0,$zero,$L41
 	lw	$a0,20($fp)
 	lw	$a1,36($fp)
 	jal	_print_base
-$L37:
+$L41:
 	lw	$v0,16($fp)
 	slt	$v0,$v0,10
-	bne	$v0,$zero,$L38
+	bne	$v0,$zero,$L42
 	lw	$v0,16($fp)
 	addu	$v0,$v0,87
 	move	$a0,$v0
 	jal	_print_char
-	j	$L36
-$L38:
+	j	$L40
+$L42:
 	lw	$a0,16($fp)
 	jal	_print_int
-$L36:
+$L40:
 	move	$sp,$fp
 	lw	$ra,28($sp)
 	lw	$fp,24($sp)
@@ -308,16 +397,16 @@ _myprintf:
 	sw	$zero,32($fp)
 	addu	$v0,$fp,60
 	sw	$v0,36($fp)
-$L41:
+$L45:
 	lw	$v0,56($fp)
 	lb	$v0,0($v0)
-	bne	$v0,$zero,$L43
-	j	$L42
-$L43:
+	bne	$v0,$zero,$L47
+	j	$L46
+$L47:
 	lw	$v0,56($fp)
 	lb	$v1,0($v0)
 	li	$v0,37			# 0x25
-	bne	$v1,$v0,$L44
+	bne	$v1,$v0,$L48
 	lw	$v0,56($fp)
 	addu	$v0,$v0,1
 	sw	$v0,56($fp)
@@ -326,60 +415,61 @@ $L43:
 	sw	$zero,24($fp)
 	sw	$zero,28($fp)
 	sw	$zero,32($fp)
-$L45:
+$L49:
 	lw	$v0,56($fp)
 	lb	$v1,0($v0)
 	li	$v0,48			# 0x30
-	beq	$v1,$v0,$L47
+	beq	$v1,$v0,$L51
 	lw	$v0,56($fp)
 	lb	$v1,0($v0)
 	li	$v0,45			# 0x2d
-	beq	$v1,$v0,$L47
+	beq	$v1,$v0,$L51
 	lw	$v0,56($fp)
 	lb	$v1,0($v0)
 	li	$v0,43			# 0x2b
-	beq	$v1,$v0,$L47
-	j	$L46
-$L47:
+	beq	$v1,$v0,$L51
+	j	$L50
+$L51:
 	lw	$v0,56($fp)
 	lb	$v0,0($v0)
 	sw	$v0,40($fp)
 	li	$v0,45			# 0x2d
 	lw	$v1,40($fp)
-	beq	$v1,$v0,$L50
+	beq	$v1,$v0,$L54
 	lw	$v1,40($fp)
 	slt	$v0,$v1,46
-	beq	$v0,$zero,$L54
+	beq	$v0,$zero,$L58
 	li	$v0,43			# 0x2b
 	lw	$v1,40($fp)
-	beq	$v1,$v0,$L51
-	j	$L48
-$L54:
+	beq	$v1,$v0,$L55
+	j	$L52
+$L58:
 	li	$v0,48			# 0x30
 	lw	$v1,40($fp)
-	beq	$v1,$v0,$L49
-	j	$L48
-$L49:
+	beq	$v1,$v0,$L53
+	j	$L52
+$L53:
 	li	$v0,1			# 0x1
 	sw	$v0,24($fp)
-	j	$L48
-$L50:
+	j	$L52
+$L54:
 	li	$v0,1			# 0x1
 	sw	$v0,28($fp)
-	j	$L48
-$L51:
+	j	$L52
+$L55:
 	li	$v0,1			# 0x1
 	sw	$v0,32($fp)
-$L48:
+$L52:
 	lw	$v0,56($fp)
 	addu	$v0,$v0,1
 	sw	$v0,56($fp)
-	j	$L45
-$L46:
+	j	$L49
+$L50:
 	lw	$a0,56($fp)
 	jal	_get_range
 	sw	$v0,16($fp)
 	lw	$a0,16($fp)
+	li	$a1,10			# 0xa
 	jal	_get_digit
 	move	$v1,$v0
 	lw	$v0,56($fp)
@@ -388,7 +478,7 @@ $L46:
 	lw	$v0,56($fp)
 	lb	$v1,0($v0)
 	li	$v0,46			# 0x2e
-	bne	$v1,$v0,$L55
+	bne	$v1,$v0,$L59
 	lw	$v0,56($fp)
 	addu	$v0,$v0,1
 	sw	$v0,56($fp)
@@ -396,53 +486,46 @@ $L46:
 	jal	_get_range
 	sw	$v0,20($fp)
 	lw	$a0,20($fp)
+	li	$a1,10			# 0xa
 	jal	_get_digit
 	move	$v1,$v0
 	lw	$v0,56($fp)
 	addu	$v0,$v0,$v1
 	sw	$v0,56($fp)
-$L55:
+$L59:
 	lw	$v0,56($fp)
 	lb	$v0,0($v0)
 	sw	$v0,44($fp)
 	li	$v0,111			# 0x6f
 	lw	$v1,44($fp)
-	beq	$v1,$v0,$L68
+	beq	$v1,$v0,$L69
 	lw	$v1,44($fp)
 	slt	$v0,$v1,112
-	beq	$v0,$zero,$L75
+	beq	$v0,$zero,$L78
 	li	$v0,99			# 0x63
 	lw	$v1,44($fp)
-	beq	$v1,$v0,$L57
+	beq	$v1,$v0,$L61
 	lw	$v1,44($fp)
 	slt	$v0,$v1,100
-	beq	$v0,$zero,$L76
+	beq	$v0,$zero,$L79
 	li	$v0,37			# 0x25
 	lw	$v1,44($fp)
-	beq	$v1,$v0,$L72
-	j	$L78
-$L76:
+	beq	$v1,$v0,$L75
+	j	$L80
+$L79:
 	li	$v0,100			# 0x64
 	lw	$v1,44($fp)
-	beq	$v1,$v0,$L62
-	j	$L78
-$L75:
-	li	$v0,116			# 0x74
-	lw	$v1,44($fp)
-	beq	$v1,$v0,$L65
-	lw	$v1,44($fp)
-	slt	$v0,$v1,117
-	beq	$v0,$zero,$L77
+	beq	$v1,$v0,$L66
+	j	$L80
+$L78:
 	li	$v0,115			# 0x73
 	lw	$v1,44($fp)
-	beq	$v1,$v0,$L58
-	j	$L78
-$L77:
+	beq	$v1,$v0,$L62
 	li	$v0,120			# 0x78
 	lw	$v1,44($fp)
-	beq	$v1,$v0,$L71
-	j	$L78
-$L57:
+	beq	$v1,$v0,$L72
+	j	$L80
+$L61:
 	lw	$v0,36($fp)
 	lb	$v0,0($v0)
 	move	$a0,$v0
@@ -450,131 +533,69 @@ $L57:
 	lw	$v0,36($fp)
 	addu	$v0,$v0,4
 	sw	$v0,36($fp)
-	j	$L78
-$L58:
+	j	$L80
+$L62:
 	lw	$v0,20($fp)
-	bne	$v0,$zero,$L59
+	bne	$v0,$zero,$L63
 	lw	$v0,36($fp)
 	lw	$a0,0($v0)
 	jal	_strlen
 	sw	$v0,20($fp)
-$L59:
-	lw	$v1,28($fp)
-	li	$v0,1			# 0x1
-	bne	$v1,$v0,$L60
-	lw	$v0,36($fp)
-	lw	$a0,20($fp)
-	lw	$a1,0($v0)
-	jal	_print_limited_string
-	lw	$v0,36($fp)
-	lw	$a0,0($v0)
-	jal	_strlen
-	move	$v1,$v0
-	lw	$v0,16($fp)
-	subu	$v0,$v0,$v1
-	move	$a0,$v0
-	move	$a1,$zero
-	jal	_max
-	move	$a0,$v0
-	move	$a1,$zero
-	jal	_print_fill
-	j	$L61
-$L60:
-	lw	$v0,36($fp)
-	lw	$a0,0($v0)
-	jal	_strlen
-	move	$v1,$v0
-	lw	$v0,16($fp)
-	subu	$v0,$v0,$v1
-	move	$a0,$v0
-	move	$a1,$zero
-	jal	_max
-	move	$a0,$v0
-	move	$a1,$zero
-	jal	_print_fill
-	lw	$v0,36($fp)
-	lw	$a0,20($fp)
-	lw	$a1,0($v0)
-	jal	_print_limited_string
-$L61:
-	lw	$v0,36($fp)
-	addu	$v0,$v0,4
-	sw	$v0,36($fp)
-	j	$L78
-$L62:
-	lw	$v1,28($fp)
-	li	$v0,1			# 0x1
-	bne	$v1,$v0,$L63
-	lw	$a0,32($fp)
-	jal	_print_plus
-	lw	$v0,36($fp)
-	lw	$a0,0($v0)
-	jal	_print_int
-	lw	$v0,36($fp)
-	lw	$a0,0($v0)
-	jal	_get_digit
-	move	$v1,$v0
-	lw	$v0,16($fp)
-	subu	$v1,$v0,$v1
-	lw	$v0,32($fp)
-	subu	$v0,$v1,$v0
-	move	$a0,$v0
-	move	$a1,$zero
-	jal	_max
-	move	$a0,$v0
-	move	$a1,$zero
-	jal	_print_fill
-	j	$L64
 $L63:
+	lw	$v1,28($fp)
+	li	$v0,1			# 0x1
+	bne	$v1,$v0,$L64
+	lw	$v0,36($fp)
+	lw	$a0,20($fp)
+	lw	$a1,0($v0)
+	jal	_print_limited_string
 	lw	$v0,36($fp)
 	lw	$a0,0($v0)
-	jal	_get_digit
+	jal	_strlen
 	move	$v1,$v0
 	lw	$v0,16($fp)
-	subu	$v1,$v0,$v1
-	lw	$v0,32($fp)
-	subu	$v0,$v1,$v0
+	subu	$v0,$v0,$v1
 	move	$a0,$v0
 	move	$a1,$zero
 	jal	_max
-	move	$v1,$v0
-	lw	$v0,24($fp)
-	xori	$v0,$v0,0x1
-	sltu	$v0,$v0,1
-	move	$a0,$v1
-	move	$a1,$v0
+	move	$a0,$v0
+	move	$a1,$zero
 	jal	_print_fill
-	lw	$a0,32($fp)
-	jal	_print_plus
-	lw	$v0,36($fp)
-	lw	$a0,0($v0)
-	jal	_print_int
+	j	$L65
 $L64:
 	lw	$v0,36($fp)
+	lw	$a0,0($v0)
+	jal	_strlen
+	move	$v1,$v0
+	lw	$v0,16($fp)
+	subu	$v0,$v0,$v1
+	move	$a0,$v0
+	move	$a1,$zero
+	jal	_max
+	move	$a0,$v0
+	move	$a1,$zero
+	jal	_print_fill
+	lw	$v0,36($fp)
+	lw	$a0,20($fp)
+	lw	$a1,0($v0)
+	jal	_print_limited_string
+$L65:
+	lw	$v0,36($fp)
 	addu	$v0,$v0,4
 	sw	$v0,36($fp)
-	j	$L78
-$L65:
+	j	$L80
+$L66:
 	lw	$v1,28($fp)
 	li	$v0,1			# 0x1
-	bne	$v1,$v0,$L66
+	bne	$v1,$v0,$L67
 	lw	$a0,32($fp)
 	jal	_print_plus
 	lw	$v0,36($fp)
-	l.s	$f2,0($v0)
-	cvt.d.w	$f2,$f2
-	li.d	$f0,1.10000000000000008882e0
-	mul.d	$f0,$f2,$f0
-	mov.d	$f12,$f0
+	lw	$a0,0($v0)
 	jal	_print_int
 	lw	$v0,36($fp)
-	l.s	$f2,0($v0)
-	cvt.d.w	$f2,$f2
-	li.d	$f0,1.10000000000000008882e0
-	mul.d	$f0,$f2,$f0
-	trunc.w.d $f2,$f0,$v1
-	mfc1	$v0,$f2
-	move	$a0,$v0
+	lw	$a0,0($v0)
+	li	$a1,10			# 0xa
 	jal	_get_digit
 	move	$v1,$v0
 	lw	$v0,16($fp)
@@ -587,50 +608,41 @@ $L65:
 	move	$a0,$v0
 	move	$a1,$zero
 	jal	_print_fill
-	j	$L67
-$L66:
-	lw	$v0,36($fp)
-	l.s	$f2,0($v0)
-	cvt.d.w	$f2,$f2
-	li.d	$f0,1.10000000000000008882e0
-	mul.d	$f0,$f2,$f0
-	trunc.w.d $f2,$f0,$v1
-	mfc1	$v0,$f2
-	move	$a0,$v0
-	jal	_get_digit
-	move	$v1,$v0
-	lw	$v0,16($fp)
-	subu	$v1,$v0,$v1
-	lw	$v0,32($fp)
-	subu	$v0,$v1,$v0
-	move	$a0,$v0
-	move	$a1,$zero
-	jal	_max
-	move	$v1,$v0
-	lw	$v0,24($fp)
-	xori	$v0,$v0,0x1
-	sltu	$v0,$v0,1
-	move	$a0,$v1
-	move	$a1,$v0
-	jal	_print_fill
-	lw	$a0,32($fp)
-	jal	_print_plus
-	lw	$v0,36($fp)
-	l.s	$f2,0($v0)
-	cvt.d.w	$f2,$f2
-	li.d	$f0,1.10000000000000008882e0
-	mul.d	$f0,$f2,$f0
-	mov.d	$f12,$f0
-	jal	_print_int
+	j	$L68
 $L67:
 	lw	$v0,36($fp)
+	lw	$a0,0($v0)
+	li	$a1,10			# 0xa
+	jal	_get_digit
+	move	$v1,$v0
+	lw	$v0,16($fp)
+	subu	$v1,$v0,$v1
+	lw	$v0,32($fp)
+	subu	$v0,$v1,$v0
+	move	$a0,$v0
+	move	$a1,$zero
+	jal	_max
+	move	$v1,$v0
+	lw	$v0,24($fp)
+	xori	$v0,$v0,0x1
+	sltu	$v0,$v0,1
+	move	$a0,$v1
+	move	$a1,$v0
+	jal	_print_fill
+	lw	$a0,32($fp)
+	jal	_print_plus
+	lw	$v0,36($fp)
+	lw	$a0,0($v0)
+	jal	_print_int
+$L68:
+	lw	$v0,36($fp)
 	addu	$v0,$v0,4
 	sw	$v0,36($fp)
-	j	$L78
-$L68:
+	j	$L80
+$L69:
 	lw	$v1,28($fp)
 	li	$v0,1			# 0x1
-	bne	$v1,$v0,$L69
+	bne	$v1,$v0,$L70
 	lw	$a0,32($fp)
 	jal	_print_plus
 	lw	$v0,36($fp)
@@ -639,6 +651,7 @@ $L68:
 	jal	_print_base
 	lw	$v0,36($fp)
 	lw	$a0,0($v0)
+	li	$a1,8			# 0x8
 	jal	_get_digit
 	move	$v1,$v0
 	lw	$v0,16($fp)
@@ -651,10 +664,11 @@ $L68:
 	move	$a0,$v0
 	move	$a1,$zero
 	jal	_print_fill
-	j	$L70
-$L69:
+	j	$L71
+$L70:
 	lw	$v0,36($fp)
 	lw	$a0,0($v0)
+	li	$a1,8			# 0x8
 	jal	_get_digit
 	move	$v1,$v0
 	lw	$v0,16($fp)
@@ -677,35 +691,83 @@ $L69:
 	lw	$a0,0($v0)
 	li	$a1,8			# 0x8
 	jal	_print_base
-$L70:
+$L71:
 	lw	$v0,36($fp)
 	addu	$v0,$v0,4
 	sw	$v0,36($fp)
-	j	$L78
-$L71:
+	j	$L80
+$L72:
+	lw	$v1,28($fp)
+	li	$v0,1			# 0x1
+	bne	$v1,$v0,$L73
+	lw	$a0,32($fp)
+	jal	_print_plus
 	lw	$v0,36($fp)
 	lw	$a0,0($v0)
 	li	$a1,16			# 0x10
 	jal	_print_base
 	lw	$v0,36($fp)
+	lw	$a0,0($v0)
+	li	$a1,16			# 0x10
+	jal	_get_digit
+	move	$v1,$v0
+	lw	$v0,16($fp)
+	subu	$v1,$v0,$v1
+	lw	$v0,32($fp)
+	subu	$v0,$v1,$v0
+	move	$a0,$v0
+	move	$a1,$zero
+	jal	_max
+	move	$a0,$v0
+	move	$a1,$zero
+	jal	_print_fill
+	j	$L74
+$L73:
+	lw	$v0,36($fp)
+	lw	$a0,0($v0)
+	li	$a1,16			# 0x10
+	jal	_get_digit
+	move	$v1,$v0
+	lw	$v0,16($fp)
+	subu	$v1,$v0,$v1
+	lw	$v0,32($fp)
+	subu	$v0,$v1,$v0
+	move	$a0,$v0
+	move	$a1,$zero
+	jal	_max
+	move	$v1,$v0
+	lw	$v0,24($fp)
+	xori	$v0,$v0,0x1
+	sltu	$v0,$v0,1
+	move	$a0,$v1
+	move	$a1,$v0
+	jal	_print_fill
+	lw	$a0,32($fp)
+	jal	_print_plus
+	lw	$v0,36($fp)
+	lw	$a0,0($v0)
+	li	$a1,16			# 0x10
+	jal	_print_base
+$L74:
+	lw	$v0,36($fp)
 	addu	$v0,$v0,4
 	sw	$v0,36($fp)
-	j	$L78
-$L72:
+	j	$L80
+$L75:
 	li	$a0,37			# 0x25
 	jal	_print_char
-	j	$L78
-$L44:
+	j	$L80
+$L48:
 	lw	$v0,56($fp)
 	lb	$v0,0($v0)
 	move	$a0,$v0
 	jal	_print_char
-$L78:
+$L80:
 	lw	$v0,56($fp)
 	addu	$v0,$v0,1
 	sw	$v0,56($fp)
-	j	$L41
-$L42:
+	j	$L45
+$L46:
 	li	$a0,10			# 0xa
 	jal	_print_char
 	move	$sp,$fp
